@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Drew Sparks - Tenstreet Concierge</title>
+    
+    <!-- PWA & Mobile Optimization -->
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="apple-touch-icon" href="favicon.png">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#c62027">
+
+    <!-- SEO & Open Graph -->
+    <meta name="description" content="Connect with Drew Sparks, Job Store Concierge at Tenstreet.">
+    <meta property="og:title" content="Drew Sparks - Tenstreet">
+    <meta property="og:description" content="Job Store Concierge. Tap to connect, call, or schedule a meeting.">
+    <meta property="og:image" content="headshot.jpg"> 
+    <meta property="og:type" content="profile">
+
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    
+    <style>
+        :root {
+            --tenstreet-red: #c62027; 
+            --tenstreet-dark-red: #881e1f;
+            --text-black: #000000;
+            --text-white: #FFFFFF;
+            --bg-gray: #EAEAEA;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: var(--bg-gray);
+            color: var(--text-black);
+            display: flex;
+            justify-content: center;
+            align-items: center; 
+            height: 100vh;
+            height: 100dvh;      
+            overflow: hidden;    
+            padding: 0 20px;
+            position: relative;
+            touch-action: none;  
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('knox-BG.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            z-index: -1;
+            opacity: 0.6; 
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translate3d(0, 40px, 0); }
+            to { opacity: 1; transform: translate3d(0, 0, 0); }
+        }
+
+        .container {
+            width: 100%;
+            max-width: 400px;
+            position: relative; 
+            display: flex;
+            flex-direction: column;
+            overflow: visible; 
+            margin-top: 20px; 
+            animation: fadeInUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+            transition: margin-top 0.3s ease;
+        }
+
+        .profile-avatar {
+            width: 110px;
+            height: 110px;
+            position: absolute;
+            top: -60px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 20;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
+        /* DEFAULT / BROWSER STYLING */
+        .inner-card {
+            background-color: white;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2), 0 5px 15px rgba(0,0,0,0.1);
+            border-radius: 16px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            height: 650px;
+            max-height: 75vh;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* PWA STANDALONE SPECIFIC STYLING */
+        @media (display-mode: standalone) {
+            .inner-card {
+                height: 680px;      
+                max-height: 85vh;   
+                border-radius: 24px; 
+                box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            }
+            .container {
+                margin-top: -10px;
+            }
+            .header {
+                background-color: var(--tenstreet-dark-red);
+            }
+        }
+
+        .header {
+            background-color: var(--tenstreet-red);
+            color: white;
+            padding: 60px 20px 30px; 
+            position: relative;
+            clip-path: polygon(0 0, 100% 0, 100% 85%, 0 100%);
+            z-index: 10;
+            text-align: center; 
+            flex-shrink: 0;
+        }
+
+        .name {
+            font-size: 32px;
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 6px;
+            text-shadow: 1px 1px 0px rgba(0,0,0,0.1);
+        }
+
+        .title {
+            font-size: 14px;
+            font-weight: 500;
+            opacity: 0.95;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+        }
+
+        .content {
+            padding: 5px 0;
+            flex: 1; 
+            position: relative;
+            background-color: white; 
+            transition: opacity 0.2s ease; 
+            display: flex;
+            flex-direction: column;
+            justify-content: center; 
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            padding: 15px 25px;
+            text-decoration: none;
+            color: var(--text-black);
+            transition: all 0.2s ease;
+            border-left: 4px solid transparent;
+            position: relative;
+            z-index: 1;
+            cursor: pointer;
+        }
+
+        .contact-item:hover {
+            background-color: #f9f9f9;
+            border-left: 4px solid var(--tenstreet-red);
+        }
+
+        .inner-card.qr-active .contact-item {
+            padding: 5px 25px;
+        }
+
+        .inner-card.qr-active #meeting-item {
+            display: none;
+        }
+
+        .icon-box {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f0f0f0;
+            border-radius: 50%;
+            margin-right: 18px;
+            color: var(--tenstreet-red);
+            font-size: 18px;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .contact-item:hover .icon-box {
+            background-color: var(--tenstreet-red);
+            color: white;
+        }
+
+        .info-text {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .info-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            color: #999;
+            font-weight: 700;
+            margin-bottom: 3px;
+            letter-spacing: 0.5px;
+        }
+
+        .info-value {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            word-break: break-all;
+        }
+
+        .actions {
+            padding: 5px 20px 10px 20px;
+            background: white;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+
+        #main-actions, #qr-view {
+            transition: opacity 0.2s ease-in-out;
+        }
+
+        #main-actions {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            opacity: 1;
+        }
+
+        .inner-card.qr-active #main-actions {
+            display: none;
+            opacity: 0;
+        }
+
+        .btn-primary {
+            display: block;
+            width: 100%;
+            background-color: var(--text-black);
+            color: white;
+            text-align: center;
+            padding: 18px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 14px;
+            transition: transform 0.1s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
+
+        .secondary-row {
+            display: flex;
+            gap: 12px;
+            width: 100%;
+        }
+
+        .btn-ghost {
+            background: none;
+            border: 1px solid #e0e0e0;
+            color: #666;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 14px;
+            border-radius: 12px;
+            transition: all 0.2s;
+        }
+
+        .btn-share { flex: 4; }
+        .btn-qr { flex: 1.2; }
+
+        .btn-ghost:hover {
+            background-color: #f5f5f5;
+            color: var(--tenstreet-red);
+            border-color: #d0d0d0;
+        }
+
+        #qr-view {
+            display: none;
+            width: 100%;
+            animation: fadeIn 0.3s ease;
+            opacity: 0;
+            flex: 1;
+            flex-direction: column;
+            justify-content: center; 
+        }
+
+        .inner-card.qr-active #qr-view {
+            display: flex;
+            opacity: 1;
+        }
+
+        .black-box-container {
+            background-color: black;
+            border-radius: 20px;
+            padding: 20px 0px; 
+            display: grid;
+            grid-template-columns: 60px 1fr 60px; 
+            align-items: center;
+            justify-items: center;
+            width: 100%;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        .qr-side-bar {
+            display: flex;
+            flex-direction: column; 
+            background: #222;
+            padding: 5px;
+            border-radius: 12px;
+            gap: 8px;
+            width: 44px; 
+        }
+
+        .qr-side-bar button {
+            background: transparent;
+            border: none;
+            color: #777;
+            padding: 0;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 34px; 
+            height: 34px; 
+        }
+
+        .qr-side-bar button:hover {
+            color: var(--tenstreet-red);
+        }
+
+        .qr-side-bar button.active {
+            background: var(--tenstreet-red);
+            color: white;
+        }
+
+        #qrcode {
+            padding: 10px;
+            background: white; 
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .footer-logo {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-black);
+            text-decoration: none;
+            font-weight: 800;
+            font-size: 20px;
+            opacity: 0.8;
+            transition: all 0.2s;
+            padding-top: 15px;
+            margin-top: auto;
+        }
+
+        .footer-logo i {
+            color: var(--tenstreet-red);
+            margin-right: 6px;
+            font-size: 22px; 
+        }
+        
+        .footer-decoration {
+            height: 12px;
+            background: var(--tenstreet-red);
+            flex-shrink: 0;
+        }
+
+        .inner-card.qr-active .footer-logo {
+            margin-top:-10px;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background-color: #333;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-size: 13px;
+            font-weight: 500;
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 100;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        @keyframes nfcPulse {
+            0% { box-shadow: 0 0 0 0 rgba(198, 32, 39, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(198, 32, 39, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(198, 32, 39, 0); }
+        }
+        .btn-nfc-active {
+            animation: nfcPulse 1.5s infinite;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <img src="headshot.jpg" alt="Drew Sparks" class="profile-avatar">
+
+        <div class="inner-card" id="mainCard">
+            <header class="header">
+                <div class="name-block">
+                    <div class="name">Drew Sparks</div>
+                    <div class="title">Tenstreet Concierge</div>
+                </div>
+            </header>
+
+            <div class="content">
+                <a href="tel:+18652361194" class="contact-item">
+                    <div class="icon-box"><i class="fa-solid fa-phone"></i></div>
+                    <div class="info-text">
+                        <span class="info-label">Mobile</span>
+                        <span class="info-value">865-236-1194</span>
+                    </div>
+                </a>
+
+                <a href="mailto:drew.sparks@tenstreet.com" class="contact-item">
+                    <div class="icon-box"><i class="fa-solid fa-envelope"></i></div>
+                    <div class="info-text">
+                        <span class="info-label">Email</span>
+                        <span class="info-value">drew.sparks@tenstreet.com</span>
+                    </div>
+                </a>
+
+                <a href="https://www.linkedin.com/in/drewksparks/" class="contact-item">
+                    <div class="icon-box"><i class="fa-brands fa-linkedin"></i></div>
+                    <div class="info-text">
+                        <span class="info-label">LinkedIn</span>
+                        <span class="info-value">linkedin.com/in/drewksparks</span>
+                    </div>
+                </a>
+
+                <a href="https://calendly.com/drew-sparks/" target="_blank" class="contact-item" id="meeting-item">
+                    <div class="icon-box"><i class="fa-regular fa-calendar-check"></i></div>
+                    <div class="info-text">
+                        <span class="info-label">Schedule</span>
+                        <span class="info-value">Book a Meeting</span>
+                    </div>
+                </a>
+            </div>
+
+            <div class="actions">
+                <div id="main-actions">
+                    <a href="drew_sparks.vcf" download class="btn-primary">
+                        <i class="fa-regular fa-address-card"></i> Save to Contacts
+                    </a>
+                    
+                    <div class="secondary-row">
+                        <button class="btn-ghost btn-share" onclick="shareProfile()">
+                            <i class="fa-solid fa-share-nodes"></i> Share
+                        </button>
+                        <button class="btn-ghost btn-qr" onclick="toggleQR(true)">
+                            <i class="fa-solid fa-qrcode"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="qr-view">
+                    <div class="black-box-container">
+                        <div class="qr-side-bar">
+                            <button id="close-btn" onclick="toggleQR(false)" title="Close">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+                            <button id="nfc-btn" onclick="toggleNFCBroadcasting()" title="NFC Tap Share" style="display:none;">
+                                <i class="fa-solid fa-rss"></i>
+                            </button>
+                            <button onclick="copyToClipboard()" title="Copy Link">
+                                <i class="fa-solid fa-copy"></i>
+                            </button>
+                        </div>
+
+                        <div id="qrcode" onclick="toggleQR(false)"></div>
+
+                        <div class="qr-side-bar">
+                            <button id="toggle-url" class="active" onclick="updateQRMode('url')" title="Share Link">
+                                <i class="fa-solid fa-link"></i>
+                            </button>
+                            <button id="toggle-vcard" onclick="updateQRMode('vcard')" title="Share Contact Card">
+                                <i class="fa-regular fa-address-card"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <a href="https://www.tenstreet.com" class="footer-logo">
+                     <i class="fa-solid fa-chevron-right"></i> tenstreet
+                </a>
+            </div>
+            
+            <div class="footer-decoration"></div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast">
+        <i class="fa-solid fa-check-circle"></i> <span id="toast-text">Link Copied!</span>
+    </div>
+
+    <script>
+        let qrGenerator = null;
+        let vCardData = "";
+        let nfcController = null;
+        let isNFCBroadcasting = false;
+
+        fetch('drew_sparks.min.vcf')
+            .then(res => res.text())
+            .then(data => { vCardData = data; })
+            .catch(err => console.error("Could not load minified vCard for QR", err));
+
+        window.addEventListener('load', function() {
+            qrGenerator = new QRCode(document.getElementById("qrcode"), {
+                text: window.location.href,
+                width: 200, 
+                height: 200,
+                colorDark : "#000000",
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.M
+            });
+            
+            if ("NDEFReader" in window) {
+                const nfcBtn = document.getElementById('nfc-btn');
+                const closeBtn = document.getElementById('close-btn');
+                if (nfcBtn && closeBtn) {
+                    nfcBtn.style.display = 'flex';
+                    closeBtn.style.display = 'none';
+                }
+            }
+
+            // PWA Auto-start logic
+            if (window.matchMedia('(display-mode: standalone)').matches) {
+                // Short timeout to ensure intro animations and QR generator are ready
+                setTimeout(() => {
+                    toggleQR(true);
+                }, 500);
+            }
+        });
+
+        async function toggleNFCBroadcasting() {
+            const btn = document.getElementById('nfc-btn');
+            if (isNFCBroadcasting) { stopNFC(); return; }
+            try {
+                if (!("NDEFReader" in window)) return;
+                const ndef = new NDEFReader();
+                nfcController = new AbortController();
+                
+                showToast("NFC Ready. Tap device.");
+                btn.classList.add('btn-nfc-active', 'active');
+                isNFCBroadcasting = true;
+
+                await ndef.write({
+                    records: [{ recordType: "url", data: window.location.href }]
+                }, { signal: nfcController.signal });
+
+                showToast("Shared via NFC!");
+            } catch (error) {
+                if (error.name !== 'AbortError') {
+                    console.error("NFC Error:", error);
+                    if (error.name === 'NotSupportedError' || error.name === 'NetworkError') {
+                        showToast("Unsupported Tag (Credit Card)");
+                    } else if (error.name === 'SecurityError') {
+                        // This often happens on auto-start without a gesture
+                        showToast("Tap NFC icon to start");
+                    } else {
+                        showToast("NFC Error. Try again.");
+                    }
+                }
+            } finally { stopNFC(); }
+        }
+
+        function stopNFC() {
+            if (nfcController) { nfcController.abort(); nfcController = null; }
+            const btn = document.getElementById('nfc-btn');
+            if (btn) btn.classList.remove('btn-nfc-active', 'active');
+            isNFCBroadcasting = false;
+        }
+
+        function updateQRMode(mode) {
+            document.getElementById('toggle-url').classList.toggle('active', mode === 'url');
+            document.getElementById('toggle-vcard').classList.toggle('active', mode === 'vcard');
+            qrGenerator.clear();
+            if (mode === 'vcard') {
+                qrGenerator.makeCode(vCardData || "vCard Unavailable");
+            } else {
+                qrGenerator.makeCode(window.location.href);
+            }
+        }
+
+        function toggleQR(show) {
+            const card = document.getElementById('mainCard');
+            if(show) { 
+                card.classList.add('qr-active'); 
+                if ("NDEFReader" in window) { toggleNFCBroadcasting(); }
+            } else { 
+                card.classList.remove('qr-active');
+                updateQRMode('url');
+                stopNFC(); 
+            }
+        }
+
+        function copyToClipboard() {
+            navigator.clipboard.writeText(window.location.href).then(() => {
+                showToast("Link Copied!");
+            });
+        }
+
+        async function shareProfile() {
+            const shareData = {
+                title: 'Drew Sparks - Tenstreet',
+                text: 'Connect with Drew Sparks at Tenstreet.',
+                url: window.location.href
+            };
+            if (navigator.share) {
+                try { await navigator.share(shareData); } 
+                catch (err) { console.log('User cancelled share or error:', err); }
+            } else { copyToClipboard(); }
+        }
+
+        function showToast(text) {
+            const toast = document.getElementById('toast');
+            const textSpan = document.getElementById('toast-text');
+            if (textSpan) textSpan.innerText = text;
+            toast.classList.add('show');
+            setTimeout(() => { toast.classList.remove('show'); }, 3000);
+        }
+    </script>
+</body>
+</html>
