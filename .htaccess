@@ -1,0 +1,32 @@
+# Digital business card — drop-in rules for /card/.
+#
+# The site root sets `X-Content-Type-Options: nosniff` globally, so a .vcf
+# served without an explicit type will NOT be sniffed into a contact card:
+# iOS and Android both need text/vcard before they will hand the file to the
+# contacts app. Without this line "Save to Contacts" downloads a dead file.
+<IfModule mod_mime.c>
+  AddType text/vcard .vcf
+  AddType application/manifest+json .webmanifest
+</IfModule>
+
+# index.html is the entry point for this directory.
+DirectoryIndex index.html
+
+<IfModule mod_headers.c>
+  # The service worker must not be cached, or a redeploy can never take effect:
+  # a stale sw.js keeps serving the old precache list indefinitely.
+  <FilesMatch "sw\.js$">
+    Header set Cache-Control "no-cache, must-revalidate"
+  </FilesMatch>
+
+  # The vCard changes whenever the details do; never let a proxy pin it.
+  <FilesMatch "\.vcf$">
+    Header set Cache-Control "public, max-age=3600"
+  </FilesMatch>
+</IfModule>
+
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType image/png "access plus 1 month"
+  ExpiresByType text/javascript "access plus 1 week"
+</IfModule>

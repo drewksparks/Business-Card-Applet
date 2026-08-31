@@ -1,26 +1,52 @@
 {
-  "name": "Drew Business Card - Tenstreet",
-  "short_name": "Business Card",
-  "start_url": "index.html",
+  "name": "Drew Sparks \u2014 DriverLanding",
+  "short_name": "Drew Sparks",
+  "description": "Digital business card for Drew Sparks, Founder of DriverLanding.",
+  "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
-  "background_color": "#c62027",
-  "theme_color": "#c62027",
+  "orientation": "portrait",
+  "background_color": "#171e2e",
+  "theme_color": "#0b1323",
   "icons": [
     {
-      "src": "favicon.png",
+      "src": "assets/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
-      "src": "favicon.png",
+      "src": "assets/icon-512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
-      "src": "favicon.png",
-      "sizes": "600x600",
-      "type": "image/png"
+      "src": "assets/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "assets/icon-monochrome-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "monochrome"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Show QR code",
+      "short_name": "QR code",
+      "description": "Open straight to the scannable code",
+      "url": "./index.html?view=qr",
+      "icons": [
+        {
+          "src": "assets/icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
     }
   ]
 }

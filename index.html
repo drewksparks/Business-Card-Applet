@@ -1,691 +1,1177 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Drew Sparks - Tenstreet Concierge</title>
-    
-    <!-- PWA & Mobile Optimization -->
-    <link rel="manifest" href="manifest.json">
-    <link rel="icon" type="image/png" href="favicon.png">
-    <link rel="apple-touch-icon" href="favicon.png">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#c62027">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Drew Sparks — DriverLanding</title>
 
-    <!-- SEO & Open Graph -->
-    <meta name="description" content="Connect with Drew Sparks, Job Store Concierge at Tenstreet.">
-    <meta property="og:title" content="Drew Sparks - Tenstreet">
-    <meta property="og:description" content="Job Store Concierge. Tap to connect, call, or schedule a meeting.">
-    <meta property="og:image" content="headshot.jpg"> 
-    <meta property="og:type" content="profile">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" href="assets/icon-192.png">
+<link rel="apple-touch-icon" href="assets/icon-192.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0b1323">
 
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    
-    <style>
-        :root {
-            --tenstreet-red: #c62027; 
-            --tenstreet-dark-red: #881e1f;
-            --text-black: #000000;
-            --text-white: #FFFFFF;
-            --bg-gray: #EAEAEA;
-        }
+<meta name="description" content="Drew Sparks, Founder of DriverLanding. Tap to call, email, save the contact, or book a meeting.">
+<meta property="og:type" content="profile">
+<meta property="og:title" content="Drew Sparks — Founder, DriverLanding">
+<meta property="og:description" content="Tap to call, email, save the contact, or book a meeting.">
+<meta property="og:image" content="assets/headshot.png">
+<meta property="og:url" content="https://www.driverlanding.com/card/">
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            -webkit-tap-highlight-color: transparent;
-        }
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-        body {
-            font-family: 'Montserrat', sans-serif;
-            background-color: var(--bg-gray);
-            color: var(--text-black);
-            display: flex;
-            justify-content: center;
-            align-items: center; 
-            height: 100vh;
-            height: 100dvh;      
-            overflow: hidden;    
-            padding: 0 20px;
-            position: relative;
-            touch-action: none;  
-        }
+<style>
+/* ==========================================================================
+   Drew Sparks — digital business card.
+   Layout is the original Tenstreet card: Knoxville street map behind a white
+   sheet, avatar overhanging an angled header, footer logo and accent bar
+   pinned to the bottom. Palette is DriverLanding's — navy structure, amber
+   accent — in place of the old red.
+   ========================================================================== */
+:root{
+  --navy:#0b1323;          /* header, primary button, body copy */
+  --navy-deep:#060e1e;     /* standalone header, QR surround */
+  --amber:#f1b43d;         /* the accent that used to be Tenstreet red */
+  --amber-dim:#fabc44;
+  --blue:#4cbfe3;
+  --text:#1b2233;
+  --muted:#8a91a0;
+  --bg-gray:#EAEAEA;
+  --font:'Montserrat',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+}
 
-        body::before {
-            content: "";
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: url('knox-BG.png');
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            z-index: -1;
-            opacity: 0.6; 
-        }
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translate3d(0, 40px, 0); }
-            to { opacity: 1; transform: translate3d(0, 0, 0); }
-        }
+html{-webkit-text-size-adjust:100%}
 
-        .container {
-            width: 100%;
-            max-width: 400px;
-            position: relative; 
-            display: flex;
-            flex-direction: column;
-            overflow: visible; 
-            margin-top: 20px; 
-            animation: fadeInUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
-            transition: margin-top 0.3s ease;
-        }
+body{
+  font-family:var(--font);
+  background-color:var(--bg-gray);
+  color:var(--text);
+  -webkit-font-smoothing:antialiased;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+  height:100dvh;
+  overflow:hidden;          /* no pull-to-refresh, no page bounce */
+  padding:0 20px;
+  position:relative;
+  touch-action:none;
+}
 
-        .profile-avatar {
-            width: 110px;
-            height: 110px;
-            position: absolute;
-            top: -60px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 20;
-            object-fit: cover;
-            border-radius: 50%;
-        }
+/* The Knoxville street map. Kept from the original card — it reads as
+   transportation without saying so, and it is the city Drew lives in. */
+body::before{
+  content:"";
+  position:fixed;
+  /* Bled past the viewport so the parallax shift never uncovers an edge. */
+  inset:-26px;
+  transform:translate3d(var(--px,0px),var(--py,0px),0);
+  will-change:transform;
+  background-image:url('assets/knox-BG.png');
+  background-size:cover;
+  background-position:center;
+  background-repeat:no-repeat;
+  z-index:-1;
+  opacity:.6;
+}
 
-        /* DEFAULT / BROWSER STYLING */
-        .inner-card {
-            background-color: white;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.2), 0 5px 15px rgba(0,0,0,0.1);
-            border-radius: 16px;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            position: relative;
-            height: 650px;
-            max-height: 75vh;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
+@keyframes fadeInUp{
+  from{opacity:0;transform:translate3d(0,40px,0)}
+  to{opacity:1;transform:translate3d(0,0,0)}
+}
 
-        /* PWA STANDALONE SPECIFIC STYLING */
-        @media (display-mode: standalone) {
-            .inner-card {
-                height: 680px;      
-                max-height: 85vh;   
-                border-radius: 24px; 
-                box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-            }
-            .container {
-                margin-top: -10px;
-            }
-            .header {
-                background-color: var(--tenstreet-dark-red);
-            }
-        }
+.container{
+  width:100%;
+  max-width:400px;
+  position:relative;
+  display:flex;
+  flex-direction:column;
+  overflow:visible;         /* the avatar overhangs the card */
+  margin-top:20px;
+  animation:fadeInUp .8s cubic-bezier(.2,.8,.2,1);
+  transition:margin-top .3s ease;
+}
 
-        .header {
-            background-color: var(--tenstreet-red);
-            color: white;
-            padding: 60px 20px 30px; 
-            position: relative;
-            clip-path: polygon(0 0, 100% 0, 100% 85%, 0 100%);
-            z-index: 10;
-            text-align: center; 
-            flex-shrink: 0;
-        }
+/* Overhanging portrait — this is what makes the sheet read as a card.
+   Now the transparent cutout rather than a circular crop: his silhouette breaks
+   the card's top edge, and the amber chevron baked into the artwork carries the
+   brand shape. drop-shadow follows the alpha, so the shadow traces the figure
+   instead of boxing it. */
+.profile-avatar{
+  width:168px;
+  height:168px;
+  position:absolute;
+  top:-88px;
+  left:50%;
+  transform:translateX(-50%);
+  z-index:20;
+  filter:drop-shadow(0 8px 14px rgba(11,19,35,.42));
+  pointer-events:none;
+}
 
-        .name {
-            font-size: 32px;
-            font-weight: 800;
-            line-height: 1.1;
-            margin-bottom: 6px;
-            text-shadow: 1px 1px 0px rgba(0,0,0,0.1);
-        }
+/* ---------- Card frame ----------
+   Fixed height on purpose: the header, footer logo and accent bar stay pinned
+   while only the middle channel morphs between the contact list and the QR
+   view, so nothing jumps when you toggle. */
+.inner-card{
+  background-color:#fff;
+  box-shadow:0 15px 35px rgba(0,0,0,.2),0 5px 15px rgba(0,0,0,.1);
+  border-radius:16px;
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+  position:relative;
+  height:650px;
+  max-height:75vh;
+  transition:all .3s cubic-bezier(.4,0,.2,1);
+}
 
-        .title {
-            font-size: 14px;
-            font-weight: 500;
-            opacity: 0.95;
-            letter-spacing: 1.5px;
-            text-transform: uppercase;
-        }
+@media (display-mode:standalone){
+  /* No address bar to budget for, so reclaim the space and sit closer to a
+     native sheet. */
+  .inner-card{
+    height:680px;
+    max-height:85vh;
+    border-radius:24px;
+    box-shadow:0 25px 50px -12px rgba(0,0,0,.25);
+  }
+  .container{margin-top:-10px}
+  .header{background-color:var(--navy-deep)}
+  #pin-btn{display:flex}
+}
 
-        .content {
-            padding: 5px 0;
-            flex: 1; 
-            position: relative;
-            background-color: white; 
-            transition: opacity 0.2s ease; 
-            display: flex;
-            flex-direction: column;
-            justify-content: center; 
-        }
+#pin-btn{display:none}
 
-        .contact-item {
-            display: flex;
-            align-items: center;
-            padding: 15px 25px;
-            text-decoration: none;
-            color: var(--text-black);
-            transition: all 0.2s ease;
-            border-left: 4px solid transparent;
-            position: relative;
-            z-index: 1;
-            cursor: pointer;
-        }
+/* ---------- Header ----------
+   The bottom edge is a landing curve rather than the old straight diagonal:
+   the descent flattening out, which is the company's name drawn literally. The
+   sweep is an SVG with preserveAspectRatio="none" so it stretches to any card
+   width, where a clip-path polygon could only ever be straight. */
+.header{
+  background-color:var(--navy);
+  color:#fff;
+  padding:88px 20px 22px;
+  position:relative;
+  z-index:10;
+  text-align:center;
+  flex-shrink:0;
+}
 
-        .contact-item:hover {
-            background-color: #f9f9f9;
-            border-left: 4px solid var(--tenstreet-red);
-        }
+.header-arc{
+  position:absolute;
+  left:0;
+  bottom:-1px;          /* overlap by a pixel so no seam shows on fractional DPRs */
+  width:100%;
+  height:56px;
+  display:block;
+  z-index:2;
+}
 
-        .inner-card.qr-active .contact-item {
-            padding: 5px 25px;
-        }
+/* Starfield, matching the site's .starfield-bg but with larger stars so it
+   still reads in a header this short. Same three-layer box-shadow technique
+   and same brand colours; sizes and speeds scaled up for the smaller box.
 
-        .inner-card.qr-active #meeting-item {
-            display: none;
-        }
+   Positions use container query units so they track the header's own box.
+   The card is 320-400px wide depending on the handset, and px offsets tuned
+   for 400 would drop a fifth of the stars off the right edge on a narrow
+   phone. `container-type: size` is safe here only because .header-stars takes
+   its size from inset:0 rather than from content — putting it on .header
+   itself would collapse the header to nothing. */
+.header-stars{
+  position:absolute;
+  inset:0;
+  overflow:hidden;
+  z-index:0;
+  container-type:size;
+  pointer-events:none;
+  opacity:.85;
+}
 
-        .icon-box {
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-color: #f0f0f0;
-            border-radius: 50%;
-            margin-right: 18px;
-            color: var(--tenstreet-red);
-            font-size: 18px;
-            transition: all 0.2s;
-            flex-shrink: 0;
-        }
+.header-stars i{
+  --star-white:rgba(255,255,255,.85);
+  --star-blue:rgba(76,191,227,.85);
+  --star-amber:rgba(241,180,61,.85);
+  position:absolute;
+  top:0;
+  left:0;
+  background:transparent;
+  display:block;   /* square, as in the other starfield implementations */
+}
 
-        .contact-item:hover .icon-box {
-            background-color: var(--tenstreet-red);
-            color: white;
-        }
+/* Each layer repeats its stars at +100cqh so the translate loops seamlessly. */
+@keyframes starsUp{from{transform:translateY(0)}to{transform:translateY(-100cqh)}}
 
-        .info-text {
-            display: flex;
-            flex-direction: column;
-        }
+/* Layer 1 — small, slowest, densest (farthest) */
+.header-stars .s1{
+  width:2.5px;height:2.5px;
+  translate:calc(var(--px,0px) * .4) calc(var(--py,0px) * .4);
+  animation:starsUp 90s linear infinite;
+  box-shadow:
+    8cqw 12cqh var(--star-white),   24cqw 62cqh var(--star-amber),
+    41cqw 22cqh var(--star-white),  57cqw 78cqh var(--star-blue),
+    70cqw 34cqh var(--star-white),  86cqw 8cqh  var(--star-amber),
+    95cqw 55cqh var(--star-white),  14cqw 88cqh var(--star-blue),
+    33cqw 44cqh var(--star-white),  78cqw 68cqh var(--star-blue),
+    8cqw 112cqh var(--star-white),  24cqw 162cqh var(--star-amber),
+    41cqw 122cqh var(--star-white), 57cqw 178cqh var(--star-blue),
+    70cqw 134cqh var(--star-white), 86cqw 108cqh var(--star-amber),
+    95cqw 155cqh var(--star-white), 14cqw 188cqh var(--star-blue),
+    33cqw 144cqh var(--star-white), 78cqw 168cqh var(--star-blue);
+}
 
-        .info-label {
-            font-size: 10px;
-            text-transform: uppercase;
-            color: #999;
-            font-weight: 700;
-            margin-bottom: 3px;
-            letter-spacing: 0.5px;
-        }
+/* Layer 2 — medium */
+.header-stars .s2{
+  width:3.5px;height:3.5px;
+  translate:calc(var(--px,0px) * .85) calc(var(--py,0px) * .85);
+  animation:starsUp 60s linear infinite;
+  box-shadow:
+    18cqw 36cqh var(--star-blue),   52cqw 14cqh var(--star-white),
+    73cqw 50cqh var(--star-amber),  30cqw 80cqh var(--star-white),
+    90cqw 26cqh var(--star-white),  6cqw 58cqh  var(--star-amber),
+    61cqw 66cqh var(--star-white),
+    18cqw 136cqh var(--star-blue),  52cqw 114cqh var(--star-white),
+    73cqw 150cqh var(--star-amber), 30cqw 180cqh var(--star-white),
+    90cqw 126cqh var(--star-white), 6cqw 158cqh  var(--star-amber),
+    61cqw 166cqh var(--star-white);
+}
 
-        .info-value {
-            font-size: 16px;
-            font-weight: 600;
-            color: #333;
-            word-break: break-all;
-        }
+/* Layer 3 — large, fastest, sparsest (nearest) */
+.header-stars .s3{
+  width:5px;height:5px;
+  translate:calc(var(--px,0px) * 1.5) calc(var(--py,0px) * 1.5);
+  animation:starsUp 34s linear infinite;
+  box-shadow:
+    12cqw 28cqh var(--star-amber),  38cqw 72cqh var(--star-white),
+    66cqw 18cqh var(--star-blue),   84cqw 84cqh var(--star-white),
+    12cqw 128cqh var(--star-amber), 38cqw 172cqh var(--star-white),
+    66cqw 118cqh var(--star-blue),  84cqw 184cqh var(--star-white);
+}
 
-        .actions {
-            padding: 5px 20px 10px 20px;
-            background: white;
-            text-align: center;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 10px;
-            flex-shrink: 0;
-        }
+.name,.title{position:relative;z-index:1}
 
-        #main-actions, #qr-view {
-            transition: opacity 0.2s ease-in-out;
-        }
+.name{
+  font-size:32px;
+  font-weight:800;
+  line-height:1.1;
+  margin-bottom:6px;
+  letter-spacing:-.01em;
+}
 
-        #main-actions {
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            opacity: 1;
-        }
+.title{
+  font-size:14px;
+  font-weight:500;
+  letter-spacing:1.5px;
+  text-transform:uppercase;
+  color:var(--amber);
+}
 
-        .inner-card.qr-active #main-actions {
-            display: none;
-            opacity: 0;
-        }
+/* ---------- Contact list ---------- */
+.content{
+  padding:5px 0;
+  flex:1;
+  min-height:0;
+  position:relative;
+  background-color:#fff;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  /* The frame is a fixed height, so if a row ever cannot fit, scroll this
+     channel rather than letting .inner-card's overflow:hidden silently cut it
+     off — which is how the original lost its buttons on small handsets. */
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+  transition:opacity .2s ease;
+}
 
-        .btn-primary {
-            display: block;
-            width: 100%;
-            background-color: var(--text-black);
-            color: white;
-            text-align: center;
-            padding: 18px;
-            border-radius: 12px;
-            text-decoration: none;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-size: 14px;
-            transition: transform 0.1s;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            border: none;
-            cursor: pointer;
-        }
+.contact-item{
+  display:flex;
+  align-items:center;
+  padding:13px 25px;
+  text-decoration:none;
+  color:var(--text);
+  /* Deliberately not transitioning padding. Animating it reflows the whole
+     column every frame, and the in-flight value kept the row at its full
+     height long enough to overflow the frame. The original faded opacity
+     only, for the same reason. */
+  transition:background-color .2s ease,border-color .2s ease;
+  border-left:4px solid transparent;
+  position:relative;
+  z-index:1;
+}
 
-        .btn-primary:active {
-            transform: scale(0.98);
-        }
+.contact-item:hover,.contact-item:focus-visible{
+  background-color:#faf9f7;
+  border-left-color:var(--amber);
+}
 
-        .secondary-row {
-            display: flex;
-            gap: 12px;
-            width: 100%;
-        }
+/* Condensed state: tighten the rows and drop the scheduling link so the QR
+   can share the frame with the details worth reading while it is scanned. */
+.inner-card.qr-active .contact-item{padding:4px 25px}
+.inner-card.qr-active #meeting-item{display:none}
 
-        .btn-ghost {
-            background: none;
-            border: 1px solid #e0e0e0;
-            color: #666;
-            font-family: 'Montserrat', sans-serif;
-            font-weight: 600;
-            font-size: 14px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            padding: 14px;
-            border-radius: 12px;
-            transition: all 0.2s;
-        }
+/* The original used a light grey circle with a red glyph — the brand colour
+   carried the list. Amber is too light to sit on grey as a glyph, so the tint
+   moves to the circle and the glyph stays navy: same warmth, readable icon. */
+.icon-box{
+  width:40px;
+  height:40px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background-color:rgba(241,180,61,.16);
+  border-radius:50%;
+  margin-right:18px;
+  color:var(--navy);
+  transition:background-color .2s,color .2s;
+  flex-shrink:0;
+}
+.icon-box svg{width:18px;height:18px}
 
-        .btn-share { flex: 4; }
-        .btn-qr { flex: 1.2; }
+.contact-item:hover .icon-box,.contact-item:focus-visible .icon-box{
+  background-color:var(--amber);
+  color:var(--navy);
+}
 
-        .btn-ghost:hover {
-            background-color: #f5f5f5;
-            color: var(--tenstreet-red);
-            border-color: #d0d0d0;
-        }
+.info-text{display:flex;flex-direction:column;min-width:0}
 
-        #qr-view {
-            display: none;
-            width: 100%;
-            animation: fadeIn 0.3s ease;
-            opacity: 0;
-            flex: 1;
-            flex-direction: column;
-            justify-content: center; 
-        }
+.info-label{
+  font-size:10px;
+  text-transform:uppercase;
+  color:var(--muted);
+  font-weight:700;
+  margin-bottom:3px;
+  letter-spacing:.5px;
+}
 
-        .inner-card.qr-active #qr-view {
-            display: flex;
-            opacity: 1;
-        }
+.info-value{
+  font-size:16px;
+  font-weight:600;
+  color:var(--text);
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
 
-        .black-box-container {
-            background-color: black;
-            border-radius: 20px;
-            padding: 20px 0px; 
-            display: grid;
-            grid-template-columns: 60px 1fr 60px; 
-            align-items: center;
-            justify-items: center;
-            width: 100%;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-        }
+/* ---------- Actions ---------- */
+.actions{
+  padding:4px 20px 8px;
+  background:#fff;
+  text-align:center;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:10px;
+  flex-shrink:0;
+}
 
-        .qr-side-bar {
-            display: flex;
-            flex-direction: column; 
-            background: #222;
-            padding: 5px;
-            border-radius: 12px;
-            gap: 8px;
-            width: 44px; 
-        }
+#main-actions,#qr-view{transition:opacity .2s ease-in-out}
 
-        .qr-side-bar button {
-            background: transparent;
-            border: none;
-            color: #777;
-            padding: 0;
-            font-size: 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 34px; 
-            height: 34px; 
-        }
+#main-actions{
+  width:100%;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  opacity:1;
+}
+.inner-card.qr-active #main-actions{display:none;opacity:0}
 
-        .qr-side-bar button:hover {
-            color: var(--tenstreet-red);
-        }
+.btn-primary{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  width:100%;
+  background-color:var(--navy);
+  color:#fff;
+  padding:18px;
+  border-radius:12px;
+  text-decoration:none;
+  font-family:var(--font);
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:1px;
+  font-size:14px;
+  border:none;
+  cursor:pointer;
+  box-shadow:0 4px 6px rgba(0,0,0,.1);
+  transition:transform .1s,background-color .2s;
+}
+.btn-primary svg{width:17px;height:17px}
+.btn-primary:hover{background-color:#16203a}
+.btn-primary:active{transform:scale(.98)}
 
-        .qr-side-bar button.active {
-            background: var(--tenstreet-red);
-            color: white;
-        }
+.secondary-row{display:flex;gap:12px;width:100%}
 
-        #qrcode {
-            padding: 10px;
-            background: white; 
-            border-radius: 6px;
-            cursor: pointer;
-        }
+.btn-ghost{
+  background:none;
+  border:1px solid #e0e0e0;
+  color:#666;
+  font-family:var(--font);
+  font-weight:600;
+  font-size:14px;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  padding:14px;
+  border-radius:12px;
+  transition:background-color .2s,color .2s,border-color .2s;
+}
+.btn-ghost svg{width:16px;height:16px}
+.btn-share{flex:4}
+.btn-qr{flex:1.2}
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+.btn-ghost:hover,.btn-ghost:focus-visible{
+  background-color:#faf9f7;
+  color:var(--navy);
+  border-color:var(--amber);
+}
 
-        .footer-logo {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--text-black);
-            text-decoration: none;
-            font-weight: 800;
-            font-size: 20px;
-            opacity: 0.8;
-            transition: all 0.2s;
-            padding-top: 15px;
-            margin-top: auto;
-        }
+/* ---------- QR view ---------- */
+#qr-view{
+  display:none;
+  width:100%;
+  opacity:0;
+  flex:1;
+  flex-direction:column;
+  justify-content:center;
+  animation:fadeIn .3s ease;
+}
+.inner-card.qr-active #qr-view{display:flex;opacity:1}
 
-        .footer-logo i {
-            color: var(--tenstreet-red);
-            margin-right: 6px;
-            font-size: 22px; 
-        }
-        
-        .footer-decoration {
-            height: 12px;
-            background: var(--tenstreet-red);
-            flex-shrink: 0;
-        }
+@keyframes fadeIn{
+  from{opacity:0;transform:translateY(10px)}
+  to{opacity:1;transform:translateY(0)}
+}
 
-        .inner-card.qr-active .footer-logo {
-            margin-top:-10px;
-        }
+.black-box-container{
+  background-color:var(--navy-deep);
+  border-radius:20px;
+  padding:20px 0;
+  display:grid;
+  /* 52px rather than the original 60px: the side bars only hold 34px buttons,
+     and the reclaimed width is what lets the code reach its full 200px on a
+     phone narrower than the 400px the original assumed. */
+  grid-template-columns:52px 1fr 52px;
+  align-items:center;
+  justify-items:center;
+  width:100%;
+  box-shadow:0 10px 20px rgba(0,0,0,.1);
+}
 
-        .toast {
-            position: fixed;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%) translateY(100px);
-            background-color: #333;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 30px;
-            font-size: 13px;
-            font-weight: 500;
-            opacity: 0;
-            transition: all 0.3s ease;
-            z-index: 100;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
+.qr-side-bar{
+  display:flex;
+  flex-direction:column;
+  background:#161e2e;
+  padding:5px;
+  border-radius:12px;
+  gap:8px;
+  width:44px;
+}
 
-        .toast.show {
-            transform: translateX(-50%) translateY(0);
-            opacity: 1;
-        }
+.qr-side-bar button{
+  background:transparent;
+  border:none;
+  color:#7d879c;
+  padding:0;
+  border-radius:8px;
+  cursor:pointer;
+  transition:background-color .2s,color .2s;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:34px;
+  height:34px;
+}
+.qr-side-bar button svg{width:16px;height:16px}
+.qr-side-bar button:hover{color:var(--amber)}
+.qr-side-bar button[aria-selected="true"],
+.qr-side-bar button.active{background:var(--amber);color:var(--navy)}
 
-        @keyframes nfcPulse {
-            0% { box-shadow: 0 0 0 0 rgba(198, 32, 39, 0.4); }
-            70% { box-shadow: 0 0 0 10px rgba(198, 32, 39, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(198, 32, 39, 0); }
-        }
-        .btn-nfc-active {
-            animation: nfcPulse 1.5s infinite;
-        }
-    </style>
+/* Fixed 200px, as the original canvas was. Left fluid, the SVG collapses to
+   whatever the flex leftovers allow and the code gets too small to scan. */
+#qrcode{
+  padding:10px;
+  background:#fff;
+  border-radius:6px;
+  line-height:0;
+}
+/* height:auto + a square aspect keeps the modules square when the grid column
+   is narrower than 200px. A fixed height there stretches the code. */
+#qrcode svg{display:block;width:200px;max-width:100%;height:auto;aspect-ratio:1/1}
+
+/* ---------- Footer ---------- */
+.footer-logo{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  color:var(--navy);
+  text-decoration:none;
+  font-weight:800;
+  font-size:20px;
+  letter-spacing:-.02em;
+  opacity:.85;
+  transition:opacity .2s;
+  padding-top:15px;
+  margin-top:auto;
+}
+.footer-logo:hover{opacity:1}
+.footer-logo svg{width:26px;height:26px;flex:none}
+
+.inner-card.qr-active .footer-logo{margin-top:-10px}
+
+/* The site's .text-shimmer gradient and keyframes, run across the bar instead
+   of clipped to text, at 16s against the site's 5s — an accent bar that sweeps
+   as fast as a headline would be a distraction on a card people are reading. */
+@keyframes shimmer{
+  0%{background-position:-200% center}
+  100%{background-position:200% center}
+}
+.footer-decoration{
+  height:12px;
+  background:linear-gradient(90deg,#F1B43D 0%,#F1B43D 35%,#ffffff 45%,#F1B43D 55%,#4CBFE3 80%,#F1B43D 100%);
+  background-size:200% auto;
+  animation:shimmer 16s linear infinite;
+  flex-shrink:0;
+}
+
+/* ---------- Full-screen scan mode ----------
+   Tapping the code fills the screen with it on white. Nothing a web page can do
+   raises screen brightness, but a white field and a much larger code are what
+   actually rescue a scan in bad hall lighting or across a table. */
+.scan{
+  position:fixed;
+  inset:0;
+  z-index:200;
+  background:#fff;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:18px;
+  padding:24px;
+  opacity:0;
+  visibility:hidden;
+  transition:opacity .2s ease,visibility .2s;
+}
+.scan[data-open="true"]{opacity:1;visibility:visible}
+.scan svg{
+  width:min(86vw,86vh,520px);
+  height:auto;
+  aspect-ratio:1/1;
+  display:block;
+}
+.scan-hint{
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:1.2px;
+  text-transform:uppercase;
+  color:#8a91a0;
+}
+
+/* ---------- Toast ---------- */
+.toast{
+  position:fixed;
+  bottom:calc(30px + env(safe-area-inset-bottom));
+  left:50%;
+  transform:translateX(-50%) translateY(100px);
+  background-color:var(--navy);
+  color:#fff;
+  padding:10px 20px;
+  border-radius:30px;
+  font-size:13px;
+  font-weight:600;
+  opacity:0;
+  transition:transform .3s ease,opacity .3s ease;
+  z-index:100;
+  box-shadow:0 5px 15px rgba(0,0,0,.2);
+  display:flex;
+  align-items:center;
+  gap:8px;
+  pointer-events:none;
+}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+.toast svg{width:15px;height:15px;color:var(--amber)}
+
+:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+
+/* Short screens: shrink the frame rather than clipping it. The original card
+   pinned 650px and hid the overflow, which cut the buttons off on smaller
+   handsets. */
+@media (max-height:700px){
+  /* 75vh leaves too little for the QR view on a short handset — the code, three
+     contact rows and the footer cannot all fit, and the list starts scrolling.
+     A taller cap plus a smaller code keeps everything visible at once. */
+  .inner-card{max-height:88vh}
+  .profile-avatar{width:124px;height:124px;top:-64px}
+  .header{padding:64px 20px 26px}
+  .header-arc{height:42px}
+  .name{font-size:27px}
+  .contact-item{padding:9px 25px}
+  .btn-primary{padding:15px}
+  .footer-logo{font-size:18px;padding-top:10px}
+  .black-box-container{padding:14px 0}
+  #qrcode svg{width:150px}
+}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+  /* The parallax offsets are inline styles on :root, and !important in a
+     stylesheet outranks a non-important inline style — so this pins the
+     background flat even if the easing is mid-flight when the setting flips.
+     Parallax is a known vestibular trigger; it does not get to keep running. */
+  :root{--px:0px!important;--py:0px!important}
+}
+
+.sr-only{
+  position:absolute;width:1px;height:1px;padding:0;margin:-1px;
+  overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0;
+}
+</style>
 </head>
 <body>
 
-    <div class="container">
-        <img src="headshot.jpg" alt="Drew Sparks" class="profile-avatar">
+<!-- Icon sprite: inline so the card still has icons with no network. -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
+  <symbol id="i-phone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/>
+  </symbol>
+  <symbol id="i-mail" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/>
+  </symbol>
+  <symbol id="i-linkedin" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M4.98 3.5A2.5 2.5 0 1 1 0 3.5a2.5 2.5 0 0 1 4.98 0zM.22 8.06h4.53V24H.22zM8.34 8.06h4.34v2.18h.06c.6-1.14 2.08-2.34 4.28-2.34 4.58 0 5.42 3.01 5.42 6.93V24h-4.52v-6.27c0-1.5-.03-3.42-2.08-3.42-2.09 0-2.41 1.63-2.41 3.31V24H8.34z"/>
+  </symbol>
+  <symbol id="i-calendar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M9 16l2 2 4-4"/>
+  </symbol>
+  <symbol id="i-card" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="2" y="4" width="20" height="16" rx="2"/><circle cx="8.5" cy="10.5" r="2"/>
+    <path d="M5 16c.7-1.6 2-2.4 3.5-2.4S11.3 14.4 12 16M15 9h4M15 13h4"/>
+  </symbol>
+  <symbol id="i-share" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+    <path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/>
+  </symbol>
+  <symbol id="i-qr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+    <rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM19 19h2M14 21h1M21 14v3"/>
+  </symbol>
+  <symbol id="i-link" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/>
+    <path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/>
+  </symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+  </symbol>
+  <symbol id="i-bell" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"/>
+  </symbol>
+  <symbol id="i-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M18 6 6 18M6 6l12 12"/>
+  </symbol>
+  <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="m20 6-11 11-5-5"/>
+  </symbol>
+</defs></svg>
 
-        <div class="inner-card" id="mainCard">
-            <header class="header">
-                <div class="name-block">
-                    <div class="name">Drew Sparks</div>
-                    <div class="title">Tenstreet Concierge</div>
-                </div>
-            </header>
+<div class="container">
+  <img src="assets/headshot-cutout.png" alt="Drew Sparks" class="profile-avatar" width="168" height="168">
 
-            <div class="content">
-                <a href="tel:+18652361194" class="contact-item">
-                    <div class="icon-box"><i class="fa-solid fa-phone"></i></div>
-                    <div class="info-text">
-                        <span class="info-label">Mobile</span>
-                        <span class="info-value">865-236-1194</span>
-                    </div>
-                </a>
+  <div class="inner-card" id="mainCard">
+    <header class="header">
+      <div class="header-stars" aria-hidden="true">
+        <i class="s1"></i><i class="s2"></i><i class="s3"></i>
+      </div>
+      <h1 class="name">Drew Sparks</h1>
+      <div class="title">Founder</div>
+      <svg class="header-arc" viewBox="0 0 400 56" preserveAspectRatio="none" aria-hidden="true">
+        <path fill="#fff" d="M0 24 C 130 60, 265 46, 400 2 L400 56 L0 56 Z"/>
+      </svg>
+    </header>
 
-                <a href="mailto:drew.sparks@tenstreet.com" class="contact-item">
-                    <div class="icon-box"><i class="fa-solid fa-envelope"></i></div>
-                    <div class="info-text">
-                        <span class="info-label">Email</span>
-                        <span class="info-value">drew.sparks@tenstreet.com</span>
-                    </div>
-                </a>
+    <div class="content">
+      <a href="tel:+18652361194" class="contact-item">
+        <span class="icon-box"><svg><use href="#i-phone"/></svg></span>
+        <span class="info-text">
+          <span class="info-label">Mobile</span>
+          <span class="info-value">865-236-1194</span>
+        </span>
+      </a>
 
-                <a href="https://www.linkedin.com/in/drewksparks/" class="contact-item">
-                    <div class="icon-box"><i class="fa-brands fa-linkedin"></i></div>
-                    <div class="info-text">
-                        <span class="info-label">LinkedIn</span>
-                        <span class="info-value">linkedin.com/in/drewksparks</span>
-                    </div>
-                </a>
+      <a href="mailto:drew@driverlanding.com" class="contact-item">
+        <span class="icon-box"><svg><use href="#i-mail"/></svg></span>
+        <span class="info-text">
+          <span class="info-label">Email</span>
+          <span class="info-value">drew@driverlanding.com</span>
+        </span>
+      </a>
 
-                <a href="https://calendly.com/drew-sparks/" target="_blank" class="contact-item" id="meeting-item">
-                    <div class="icon-box"><i class="fa-regular fa-calendar-check"></i></div>
-                    <div class="info-text">
-                        <span class="info-label">Schedule</span>
-                        <span class="info-value">Book a Meeting</span>
-                    </div>
-                </a>
-            </div>
+      <a href="https://www.linkedin.com/in/drewksparks/" target="_blank" rel="noopener" class="contact-item">
+        <span class="icon-box"><svg><use href="#i-linkedin"/></svg></span>
+        <span class="info-text">
+          <span class="info-label">LinkedIn</span>
+          <span class="info-value">linkedin.com/in/drewksparks</span>
+        </span>
+      </a>
 
-            <div class="actions">
-                <div id="main-actions">
-                    <a href="drew_sparks.vcf" download class="btn-primary">
-                        <i class="fa-regular fa-address-card"></i> Save to Contacts
-                    </a>
-                    
-                    <div class="secondary-row">
-                        <button class="btn-ghost btn-share" onclick="shareProfile()">
-                            <i class="fa-solid fa-share-nodes"></i> Share
-                        </button>
-                        <button class="btn-ghost btn-qr" onclick="toggleQR(true)">
-                            <i class="fa-solid fa-qrcode"></i>
-                        </button>
-                    </div>
-                </div>
+      <a href="https://calendly.com/driverlanding/intro" target="_blank" rel="noopener" class="contact-item" id="meeting-item">
+        <span class="icon-box"><svg><use href="#i-calendar"/></svg></span>
+        <span class="info-text">
+          <span class="info-label">Schedule</span>
+          <span class="info-value">Book a Meeting</span>
+        </span>
+      </a>
+    </div>
 
-                <div id="qr-view">
-                    <div class="black-box-container">
-                        <div class="qr-side-bar">
-                            <button id="close-btn" onclick="toggleQR(false)" title="Close">
-                                <i class="fa-solid fa-xmark"></i>
-                            </button>
-                            <button id="nfc-btn" onclick="toggleNFCBroadcasting()" title="NFC Tap Share" style="display:none;">
-                                <i class="fa-solid fa-rss"></i>
-                            </button>
-                            <button onclick="copyToClipboard()" title="Copy Link">
-                                <i class="fa-solid fa-copy"></i>
-                            </button>
-                        </div>
+    <div class="actions">
+      <div id="main-actions">
+        <a href="drew-sparks.vcf" download="drew-sparks.vcf" class="btn-primary">
+          <svg><use href="#i-card"/></svg> Save to Contacts
+        </a>
 
-                        <div id="qrcode" onclick="toggleQR(false)"></div>
-
-                        <div class="qr-side-bar">
-                            <button id="toggle-url" class="active" onclick="updateQRMode('url')" title="Share Link">
-                                <i class="fa-solid fa-link"></i>
-                            </button>
-                            <button id="toggle-vcard" onclick="updateQRMode('vcard')" title="Share Contact Card">
-                                <i class="fa-regular fa-address-card"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <a href="https://www.tenstreet.com" class="footer-logo">
-                     <i class="fa-solid fa-chevron-right"></i> tenstreet
-                </a>
-            </div>
-            
-            <div class="footer-decoration"></div>
+        <div class="secondary-row">
+          <button class="btn-ghost btn-share" id="share-btn">
+            <svg><use href="#i-share"/></svg> Share
+          </button>
+          <button class="btn-ghost btn-qr" id="qr-btn" aria-expanded="false" aria-controls="qr-view" aria-label="Show QR code">
+            <svg><use href="#i-qr"/></svg>
+          </button>
         </div>
+      </div>
+
+      <div id="qr-view">
+        <div class="black-box-container">
+          <div class="qr-side-bar">
+            <button id="close-btn" title="Close" aria-label="Close QR code">
+              <svg><use href="#i-close"/></svg>
+            </button>
+            <button id="copy-btn" title="Copy link" aria-label="Copy card link">
+              <svg><use href="#i-copy"/></svg>
+            </button>
+            <button id="pin-btn" title="Pin to notifications" aria-label="Pin the card to your notification shade">
+              <svg><use href="#i-bell"/></svg>
+            </button>
+          </div>
+
+          <div id="qrcode"></div>
+
+          <div class="qr-side-bar" role="tablist" aria-label="QR code contents">
+            <button id="toggle-url" role="tab" aria-selected="true" title="Share link" aria-label="Encode card link">
+              <svg><use href="#i-link"/></svg>
+            </button>
+            <button id="toggle-vcard" role="tab" aria-selected="false" title="Share contact card" aria-label="Encode contact card">
+              <svg><use href="#i-card"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sits where the Tenstreet mark used to, and links to the site now that
+           the website row has come out of the list above. -->
+      <a href="https://driverlanding.com" target="_blank" rel="noopener" class="footer-logo" aria-label="DriverLanding home page">
+        <svg viewBox="0 0 84.6 84.6" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <defs>
+            <style>
+              @keyframes flowThick{0%{stroke-dashoffset:180}100%{stroke-dashoffset:0}}
+              @keyframes flowDots{0%{stroke-dashoffset:60}100%{stroke-dashoffset:0}}
+              @keyframes flowStatic{0%,100%{stroke-dashoffset:8}30%{stroke-dashoffset:0}}
+              @keyframes coreRumble{
+                0%{transform:translate(-1px,-1px)}20%{transform:translate(1px,0)}
+                40%{transform:translate(0,1px)}60%{transform:translate(-1px,1px)}
+                80%{transform:translate(1px,-1px)}100%{transform:translate(-1px,-1px)}
+              }
+              .dl-line{stroke:#f1b43d;stroke-linecap:round;animation-iteration-count:infinite}
+              .dl-thick{animation-name:flowThick;animation-timing-function:linear}
+              .dl-dots{animation-name:flowDots;animation-timing-function:linear;stroke-dasharray:0,30;stroke-width:5.5}
+              .dl-static{animation-name:flowStatic;animation-timing-function:ease-in-out;stroke-dasharray:22;stroke-width:8}
+              .dl-l1{animation-duration:1.6s;stroke-dasharray:8,22,3,27,16,14;stroke-width:4}
+              .dl-l2{animation-duration:1.3s;stroke-dasharray:18,12,10,20,3,27;stroke-width:6}
+              .dl-l3{animation-duration:1.4s;stroke-dasharray:3,27,10,20,20,10;stroke-width:4}
+              .dl-l4{animation-duration:.4s}.dl-l5{animation-duration:.7s}
+              .dl-l6{animation-duration:.8s}.dl-l7{animation-duration:.6s}
+              .dl-rumble{transform-origin:40px 45px;animation:coreRumble .5s infinite linear}
+            </style>
+            <filter id="dlSticky">
+              <feGaussianBlur in="SourceGraphic" stdDeviation="1.8" result="blur"/>
+              <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -8" result="f"/>
+              <feComposite in="SourceGraphic" in2="f" operator="atop"/>
+            </filter>
+            <linearGradient id="dlGrad" x1="0%" y1="0%" x2="0%" y2="40%" gradientTransform="rotate(45)">
+              <stop offset="0%" stop-color="#4cbfe3" stop-opacity=".35"/>
+              <stop offset="100%" stop-opacity="0"/>
+            </linearGradient>
+            <clipPath id="dlClip"><circle cx="42.3" cy="42.3" r="41.6"/></clipPath>
+          </defs>
+          <g clip-path="url(#dlClip)">
+            <path fill="#161e2e" d="M0 0h84.6v84.6H0z"/>
+            <g>
+              <path fill="url(#dlGrad)" d="M2.37 65.6L31.22 36.75l16.55 16.55L18.92 82.15z"/>
+              <path fill="url(#dlGrad)" d="M6.35 69.55l28.85-28.85 8.34 8.34L14.7 77.89z"/>
+              <g filter="url(#dlSticky)">
+                <circle cx="41.5" cy="42.5" r="6" fill="#f1b43d"/>
+                <circle cx="44.5" cy="45.5" r="4.5" fill="#f1b43d"/>
+                <path d="M47.7 49.6L13.4 83.9" class="dl-line dl-l1 dl-thick"/>
+                <path d="M42.3 42.3L8 76.6" class="dl-line dl-l2 dl-thick"/>
+                <path d="M33.5 38.5L-.8 72.8" class="dl-line dl-l3 dl-thick"/>
+                <path d="M45 45.82L10.7 80.12" class="dl-line dl-l4 dl-dots"/>
+                <path d="M38.16 40.06L3.86 74.36" class="dl-line dl-l5 dl-dots"/>
+                <path d="M39.46 41.15L18.91 61.7" class="dl-line dl-l6 dl-static"/>
+                <path d="M43.57 43.77L23.02 64.32" class="dl-line dl-l7 dl-static"/>
+              </g>
+            </g>
+            <g class="dl-rumble">
+              <path fill="#fff" d="M60.8 27.2c.6-2.1-1.3-4-3.4-3.4L19.5 35.3c-2.2.7-2.6 3.6-.8 4.9l15.8 7.6c1.1.5 2 1.4 2.5 2.6L44.4 66c1.3 1.9 4.2 1.4 4.9-.8l11.5-38z"/>
+            </g>
+          </g>
+        </svg>
+        DriverLanding
+      </a>
     </div>
 
-    <div id="toast" class="toast">
-        <i class="fa-solid fa-check-circle"></i> <span id="toast-text">Link Copied!</span>
-    </div>
+    <div class="footer-decoration"></div>
+  </div>
+</div>
 
-    <script>
-        let qrGenerator = null;
-        let vCardData = "";
-        let nfcController = null;
-        let isNFCBroadcasting = false;
+<div class="scan" id="scan" data-open="false" role="dialog" aria-modal="true" aria-label="Enlarged QR code">
+  <div id="scan-qr"></div>
+  <p class="scan-hint">Tap anywhere to close</p>
+</div>
 
-        fetch('drew_sparks.min.vcf')
-            .then(res => res.text())
-            .then(data => { vCardData = data; })
-            .catch(err => console.error("Could not load minified vCard for QR", err));
+<div id="toast" class="toast" role="status" aria-live="polite">
+  <svg><use href="#i-check"/></svg> <span id="toast-text"></span>
+</div>
 
-        window.addEventListener('load', function() {
-            qrGenerator = new QRCode(document.getElementById("qrcode"), {
-                text: window.location.href,
-                width: 200, 
-                height: 200,
-                colorDark : "#000000",
-                colorLight : "#ffffff",
-                correctLevel : QRCode.CorrectLevel.M
-            });
-            
-            if ("NDEFReader" in window) {
-                const nfcBtn = document.getElementById('nfc-btn');
-                const closeBtn = document.getElementById('close-btn');
-                if (nfcBtn && closeBtn) {
-                    nfcBtn.style.display = 'flex';
-                    closeBtn.style.display = 'none';
-                }
-            }
+<script src="qr.js"></script>
+<script>
+(function () {
+  'use strict';
 
-            // PWA Auto-start logic
-            if (window.matchMedia('(display-mode: standalone)').matches) {
-                // Short timeout to ensure intro animations and QR generator are ready
-                setTimeout(() => {
-                    toggleQR(true);
-                }, 500);
-            }
+  /* The canonical address, not window.location.href: the code has to resolve
+     for the person scanning it, which rules out whatever local or preview URL
+     this page happens to be open at. The site 301s bare->www and /card->/card/,
+     so encoding the final form skips two redirects on a bad connection. */
+  var CARD_URL = 'https://www.driverlanding.com/card/';
+
+  /* Kept in sync with drew-sparks.min.vcf by build-vcf.py; verify.mjs fails if
+     they drift. Inlined rather than fetched so the contact QR still renders
+     with no network. */
+  var VCARD = [
+    'BEGIN:VCARD',
+    'VERSION:3.0',
+    'N:Sparks;Drew;;;',
+    'FN:Drew Sparks',
+    'ORG:DriverLanding',
+    'TITLE:Founder',
+    'TEL;TYPE=CELL:+18652361194',
+    'EMAIL:drew@driverlanding.com',
+    'URL:' + CARD_URL,
+    'END:VCARD'
+  ].join('\r\n') + '\r\n';
+
+  var card    = document.getElementById('mainCard');
+  var frame   = document.getElementById('qrcode');
+  var tabUrl  = document.getElementById('toggle-url');
+  var tabVc   = document.getElementById('toggle-vcard');
+  var qrBtn   = document.getElementById('qr-btn');
+  var toastEl = document.getElementById('toast');
+  var toastTx = document.getElementById('toast-text');
+  var toastTimer = null;
+
+  function showToast(text) {
+    toastTx.textContent = text;
+    toastEl.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toastEl.classList.remove('show'); }, 2600);
+  }
+
+  /* ---- QR ---- */
+  var mode = 'url';
+
+  function renderQR() {
+    var isUrl = mode === 'url';
+    /* EC level per payload. The link is short enough that level Q costs
+       nothing — it lands on the same version M would. The vCard is ~200 bytes,
+       where Q would push it to 65 modules against 57 at M; on a backlit screen
+       the larger modules scan faster than the redundancy would ever save. */
+    frame.innerHTML = QR.toSVG(isUrl ? CARD_URL : VCARD, {
+      ecl: isUrl ? 'Q' : 'M',
+      quiet: 2,          /* #qrcode's white padding supplies the rest of the quiet zone */
+      label: isUrl ? 'QR code linking to this card'
+                   : 'QR code containing Drew Sparks contact details'
+    });
+    tabUrl.setAttribute('aria-selected', String(isUrl));
+    tabVc.setAttribute('aria-selected', String(!isUrl));
+  }
+
+  function setMode(m) { if (m !== mode) { mode = m; renderQR(); } }
+  tabUrl.addEventListener('click', function () { setMode('url'); });
+  tabVc.addEventListener('click', function () { setMode('vcard'); });
+
+  /* Keep the screen awake while the code is up. A phone that sleeps mid-scan is
+     the single most common reason a handoff needs a second try, and this is the
+     one piece of screen behaviour a web page is actually allowed to control. */
+  var wakeLock = null;
+
+  async function acquireWakeLock() {
+    if (!('wakeLock' in navigator)) return;
+    try { wakeLock = await navigator.wakeLock.request('screen'); }
+    catch (err) { /* denied or unsupported — not worth surfacing */ }
+  }
+
+  function releaseWakeLock() {
+    if (wakeLock) { wakeLock.release().catch(function () {}); wakeLock = null; }
+  }
+
+  /* A lock is dropped whenever the tab is backgrounded, so re-take it on return
+     if the code is still showing. */
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'visible' && card.classList.contains('qr-active')) acquireWakeLock();
+  });
+
+  function toggleQR(show) {
+    if (show) {
+      renderQR();
+      card.classList.add('qr-active');
+      qrBtn.setAttribute('aria-expanded', 'true');
+      acquireWakeLock();
+      document.getElementById('close-btn').focus();
+    } else {
+      card.classList.remove('qr-active');
+      qrBtn.setAttribute('aria-expanded', 'false');
+      closeScan();
+      releaseWakeLock();
+      setMode('url');
+      qrBtn.focus();
+    }
+  }
+
+  /* ---- Full-screen scan mode ---- */
+  var scan = document.getElementById('scan');
+  var scanQR = document.getElementById('scan-qr');
+
+  function openScan() {
+    scanQR.innerHTML = frame.innerHTML;   /* same SVG, just unconstrained */
+    scan.dataset.open = 'true';
+  }
+  function closeScan() {
+    if (scan.dataset.open !== 'true') return;
+    scan.dataset.open = 'false';
+    scanQR.innerHTML = '';
+  }
+
+  frame.addEventListener('click', openScan);
+  scan.addEventListener('click', closeScan);
+
+  qrBtn.addEventListener('click', function () { toggleQR(true); });
+  document.getElementById('close-btn').addEventListener('click', function () { toggleQR(false); });
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape') return;
+    /* Escape backs out one layer at a time: enlarged code first, then the code. */
+    if (scan.dataset.open === 'true') closeScan();
+    else if (card.classList.contains('qr-active')) toggleQR(false);
+  });
+
+  /* ---- Copy ---- */
+  function legacyCopy(text) {
+    return new Promise(function (resolve, reject) {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.setAttribute('readonly', '');
+      ta.style.cssText = 'position:fixed;top:-1000px;opacity:0';
+      document.body.appendChild(ta);
+      ta.select();
+      ta.setSelectionRange(0, ta.value.length);   /* iOS needs the explicit range */
+      var ok = false;
+      try { ok = document.execCommand('copy'); } catch (err) { ok = false; }
+      document.body.removeChild(ta);
+      ok ? resolve() : reject(new Error('copy failed'));
+    });
+  }
+
+  function copyText(text) {
+    /* The Clipboard API can reject even where it exists — denied permission, a
+       non-secure origin, or a call the browser does not treat as user-driven.
+       Fall back on rejection, not merely on the API being absent. */
+    if (navigator.clipboard && window.isSecureContext) {
+      return navigator.clipboard.writeText(text).catch(function () { return legacyCopy(text); });
+    }
+    return legacyCopy(text);
+  }
+
+  document.getElementById('copy-btn').addEventListener('click', function () {
+    copyText(CARD_URL)
+      .then(function () { showToast('Link copied'); })
+      .catch(function () { showToast('Could not copy'); });
+  });
+
+  /* ---- Share ---- */
+  document.getElementById('share-btn').addEventListener('click', function () {
+    var data = {
+      title: 'Drew Sparks — DriverLanding',
+      text: 'Drew Sparks, Founder of DriverLanding.',
+      url: CARD_URL
+    };
+    if (navigator.share) {
+      navigator.share(data).catch(function (err) {
+        /* A cancelled share sheet is not a failure worth reporting. */
+        if (err && err.name !== 'AbortError') showToast('Share failed');
+      });
+    } else {
+      copyText(CARD_URL)
+        .then(function () { showToast('Link copied'); })
+        .catch(function () { showToast('Could not copy'); });
+    }
+  });
+
+  /* ---- Parallax ----
+     Feeds two custom properties that the map plane and the three star layers
+     read. Nothing here touches layout: the map moves via `transform`, and the
+     stars via the independent `translate` property, which composes with the
+     `transform` their drift animation already owns — so no wrapper elements are
+     needed and no animation gets clobbered. */
+  (function parallax() {
+    var root = document.documentElement;
+    var reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+    var MAX = 14;                       /* px of travel at full tilt */
+    var tx = 0, ty = 0, cx = 0, cy = 0, raf = null;
+
+    function frame() {
+      /* Ease toward the target so a shaky hand does not jitter the background. */
+      cx += (tx - cx) * 0.08;
+      cy += (ty - cy) * 0.08;
+      root.style.setProperty('--px', cx.toFixed(2) + 'px');
+      root.style.setProperty('--py', cy.toFixed(2) + 'px');
+      raf = (Math.abs(tx - cx) > 0.05 || Math.abs(ty - cy) > 0.05)
+        ? requestAnimationFrame(frame)
+        : null;                          /* settle and stop — no idle rAF loop */
+    }
+
+    function nudge(x, y) {
+      if (reduce.matches) return;
+      tx = x; ty = y;
+      if (!raf) raf = requestAnimationFrame(frame);
+    }
+
+    function recentre() {
+      tx = 0; ty = 0;
+      if (!raf) raf = requestAnimationFrame(frame);
+    }
+
+    /* iOS puts device orientation behind a permission prompt that needs a user
+       gesture. Prompting for motion access on a business card would cost more
+       goodwill than the effect is worth, so we simply do not run it there. */
+    var gated = typeof DeviceOrientationEvent !== 'undefined' &&
+                typeof DeviceOrientationEvent.requestPermission === 'function';
+
+    if (!gated && 'DeviceOrientationEvent' in window) {
+      var base = null;
+      window.addEventListener('deviceorientation', function (e) {
+        if (e.beta == null || e.gamma == null || reduce.matches) return;
+        if (!base) base = { b: e.beta, g: e.gamma };   /* calibrate to however it is being held */
+        var dg = Math.max(-25, Math.min(25, e.gamma - base.g));
+        var db = Math.max(-25, Math.min(25, e.beta - base.b));
+        nudge(-dg / 25 * MAX, -db / 25 * MAX);
+        /* Drift the neutral point toward the current pose, so holding a tilt
+           settles back to centre instead of pinning the background off-axis. */
+        base.g += (e.gamma - base.g) * 0.002;
+        base.b += (e.beta - base.b) * 0.002;
+      }, { passive: true });
+    }
+
+    if (window.matchMedia('(pointer: fine)').matches) {
+      window.addEventListener('pointermove', function (e) {
+        nudge((e.clientX / window.innerWidth - 0.5) * -2 * MAX,
+              (e.clientY / window.innerHeight - 0.5) * -2 * MAX);
+      }, { passive: true });
+    }
+
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden) recentre();
+    });
+
+    var onReduceChange = function () { if (reduce.matches) recentre(); };
+    reduce.addEventListener ? reduce.addEventListener('change', onReduceChange)
+                            : reduce.addListener(onReduceChange);
+  })();
+
+  /* ---- Pin to the notification shade ----
+     The closest a web app can get to keeping the card on the lock screen. A
+     notification with requireInteraction stays put until it is dismissed, shows
+     on the lock screen, and reopens the card straight to the code. It is not a
+     Live Activity — the web has no equivalent — and it does not survive a
+     reboot, but it needs no backend and works today on Android. */
+  var pinBtn = document.getElementById('pin-btn');
+
+  if (pinBtn) {
+    pinBtn.addEventListener('click', async function () {
+      if (!('Notification' in window) || !('serviceWorker' in navigator)) {
+        showToast('Not supported here');
+        return;
+      }
+      var perm = Notification.permission;
+      if (perm === 'default') {
+        try { perm = await Notification.requestPermission(); }
+        catch (err) { perm = 'denied'; }
+      }
+      if (perm !== 'granted') {
+        showToast(perm === 'denied' ? 'Notifications are blocked' : 'Permission needed');
+        return;
+      }
+      try {
+        var reg = await navigator.serviceWorker.ready;
+        await reg.showNotification('Drew Sparks — DriverLanding', {
+          body: 'Tap to show the QR code',
+          tag: 'dl-card',            /* replaces rather than stacking up */
+          renotify: false,
+          icon: 'assets/icon-192.png',
+          badge: 'assets/icon-badge-96.png',
+          requireInteraction: true,  /* sticks until dismissed */
+          silent: true,              /* no sound or vibration mid-conversation */
+          data: { url: './index.html?view=qr' }
         });
+        showToast('Pinned to notifications');
+      } catch (err) {
+        showToast('Could not pin');
+      }
+    });
+  }
 
-        async function toggleNFCBroadcasting() {
-            const btn = document.getElementById('nfc-btn');
-            if (isNFCBroadcasting) { stopNFC(); return; }
-            try {
-                if (!("NDEFReader" in window)) return;
-                const ndef = new NDEFReader();
-                nfcController = new AbortController();
-                
-                showToast("NFC Ready. Tap device.");
-                btn.classList.add('btn-nfc-active', 'active');
-                isNFCBroadcasting = true;
+  /* Tapping that notification wakes this page rather than opening a second
+     copy, so the service worker asks whichever window it focused to show the
+     code. */
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.addEventListener('message', function (e) {
+      if (e.data && e.data.action === 'show-qr') toggleQR(true);
+    });
+  }
 
-                await ndef.write({
-                    records: [{ recordType: "url", data: window.location.href }]
-                }, { signal: nfcController.signal });
+  /* ---- Offline ---- */
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('sw.js').catch(function () { /* non-fatal */ });
+    });
+  }
 
-                showToast("Shared via NFC!");
-            } catch (error) {
-                if (error.name !== 'AbortError') {
-                    console.error("NFC Error:", error);
-                    if (error.name === 'NotSupportedError' || error.name === 'NetworkError') {
-                        showToast("Unsupported Tag (Credit Card)");
-                    } else if (error.name === 'SecurityError') {
-                        // This often happens on auto-start without a gesture
-                        showToast("Tap NFC icon to start");
-                    } else {
-                        showToast("NFC Error. Try again.");
-                    }
-                }
-            } finally { stopNFC(); }
-        }
-
-        function stopNFC() {
-            if (nfcController) { nfcController.abort(); nfcController = null; }
-            const btn = document.getElementById('nfc-btn');
-            if (btn) btn.classList.remove('btn-nfc-active', 'active');
-            isNFCBroadcasting = false;
-        }
-
-        function updateQRMode(mode) {
-            document.getElementById('toggle-url').classList.toggle('active', mode === 'url');
-            document.getElementById('toggle-vcard').classList.toggle('active', mode === 'vcard');
-            qrGenerator.clear();
-            if (mode === 'vcard') {
-                qrGenerator.makeCode(vCardData || "vCard Unavailable");
-            } else {
-                qrGenerator.makeCode(window.location.href);
-            }
-        }
-
-        function toggleQR(show) {
-            const card = document.getElementById('mainCard');
-            if(show) { 
-                card.classList.add('qr-active'); 
-                if ("NDEFReader" in window) { toggleNFCBroadcasting(); }
-            } else { 
-                card.classList.remove('qr-active');
-                updateQRMode('url');
-                stopNFC(); 
-            }
-        }
-
-        function copyToClipboard() {
-            navigator.clipboard.writeText(window.location.href).then(() => {
-                showToast("Link Copied!");
-            });
-        }
-
-        async function shareProfile() {
-            const shareData = {
-                title: 'Drew Sparks - Tenstreet',
-                text: 'Connect with Drew Sparks at Tenstreet.',
-                url: window.location.href
-            };
-            if (navigator.share) {
-                try { await navigator.share(shareData); } 
-                catch (err) { console.log('User cancelled share or error:', err); }
-            } else { copyToClipboard(); }
-        }
-
-        function showToast(text) {
-            const toast = document.getElementById('toast');
-            const textSpan = document.getElementById('toast-text');
-            if (textSpan) textSpan.innerText = text;
-            toast.classList.add('show');
-            setTimeout(() => { toast.classList.remove('show'); }, 3000);
-        }
-    </script>
+  /* Straight to the code when launched from the home screen — you opened this
+     standing in front of someone — or when arrived at via ?view=qr, which is
+     what the icon long-press shortcut and the pinned notification both use. */
+  var wantsQR = /(^|[?&])view=qr(&|$)/.test(window.location.search);
+  if (wantsQR ||
+      window.matchMedia('(display-mode: standalone)').matches ||
+      window.navigator.standalone === true) {
+    setTimeout(function () { toggleQR(true); }, 400);
+  }
+})();
+</script>
 </body>
 </html>
