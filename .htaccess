@@ -20,7 +20,16 @@ DirectoryIndex index.html
   </FilesMatch>
 
   # The vCard changes whenever the details do; never let a proxy pin it.
+  #
+  # Content-Type is set here as well as via AddType above, deliberately. The
+  # whole "Save to Contacts" flow depends on this one header: under the root's
+  # nosniff, a .vcf served as application/octet-stream downloads as a dead file
+  # instead of opening the contacts app. AddType covers it wherever mod_mime is
+  # present, and this covers it wherever mod_headers is — belt and braces, since
+  # a missing module fails silently inside <IfModule> and the symptom would only
+  # ever show up on someone else's phone.
   <FilesMatch "\.vcf$">
+    Header set Content-Type "text/vcard; charset=utf-8"
     Header set Cache-Control "public, max-age=3600"
   </FilesMatch>
 </IfModule>
