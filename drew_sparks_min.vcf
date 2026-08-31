@@ -1,0 +1,11 @@
+BEGIN:VCARD
+VERSION:3.0
+N:Sparks;Drew;;;
+FN:Drew Sparks
+ORG:Tenstreet
+TITLE:Job Store Concierge
+TEL;TYPE=CELL,VOICE:(865) 236-1194
+EMAIL;TYPE=WORK,INTERNET:drew.sparks@tenstreet.com
+URL;TYPE=CALENDAR:https://calendly.com/drew-sparks/
+URL;TYPE=LINKEDIN:https://www.linkedin.com/in/drewksparks/
+END:VCARD
