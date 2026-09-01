@@ -18,38 +18,28 @@ import base64, io, os, re, textwrap
 
 from PIL import Image
 
-PHOTO = 'assets/vcard-photo.jpg'          # 400x400 master, source for both cards
-PHOTO_OVERRIDE = 'assets/vcard-photo-qr.jpg'   # optional hand-made QR thumbnail
+PHOTO = 'assets/vcard-photo.jpg'          # 400x400 master
 INDEX_HTML = 'index.html'
 
 # The downloadable card is fetched over the network like any file, so its photo
 # is only limited by taste. 300px matches what the pre-DriverLanding card
-# shipped, at ~13KB.
+# shipped, at ~11KB.
 FULL_PHOTO_SIZE = 300
 FULL_PHOTO_QUALITY = 72
 
-# The minified card's photo has to fit inside a QR code someone scans off a
-# phone screen with no network -- there is no server round trip to fall back
-# to, so this budget IS the image quality.
+# The minified card carries NO photo, deliberately.
 #
-# Sizing rule, measured rather than guessed: a QR needs roughly 2.3 captured
-# camera pixels per module to decode. At 96px/2050 bytes the code lands on
-# version 33 (149 modules), needing ~342px of camera resolution against ~289px
-# for the old 56px thumbnail -- about 18% more demanding, which any modern
-# phone clears by a wide margin at normal scanning distance. Going further hits
-# diminishing visual returns: 112px looks barely different but needs ~360px.
+# A 96x96 thumbnail was tried and reverted: it pushed the QR from 57 to 149
+# modules, and real-world scanning got noticeably harder -- enough that the
+# picture was not worth it. A simulation had suggested the density was fine;
+# scanning it on an actual phone in an actual room said otherwise, and that is
+# the measurement that counts.
 #
-# 2050 leaves ~18 bytes under version 33's 2068-byte cap at EC level L, so a
-# short future edit to a field will not silently push the code a version
-# larger. Raise both together if you want a bigger photo -- see README for the
-# version/capacity table.
-#
-# EC level L, not M or Q: this is read off a lit screen at close range, the
-# easiest condition a reader ever sees, so the redundancy those levels spend is
-# better spent as photo bytes.
-QR_PHOTO_SIZE = 96
-QR_PHOTO_BUDGET = 2050
-QR_PHOTO_ECL = 'L'
+# Keeping this text-only holds the code at version 10 / 57 modules, which is
+# 3.3 CSS pixels per module at the 200px it renders at -- chunky and forgiving.
+# For a contact photo offline, the Send Contact button shares the full .vcf
+# (with its 300px photo) straight to a nearby phone instead; see README.
+QR_ECL = 'M'
 
 C = dict(
     fn='Drew Sparks', n='Sparks;Drew;;;', org='DriverLanding, LLC', title='Founder',
@@ -83,76 +73,6 @@ def write(path, lines):
     with open(path, 'wb') as fh:
         fh.write(('\r\n'.join(lines) + '\r\n').encode('utf-8'))
     print(f'{path}: {os.path.getsize(path)} bytes, {len(lines)} lines')
-
-
-def assemble_with_photo(skeleton, jpeg):
-    """Folds a skeleton plus a base64 PHOTO into finished vCard lines."""
-    b64 = base64.b64encode(jpeg).decode()
-    lines = list(skeleton)
-    lines.append('PHOTO;TYPE=JPEG;ENCODING=b:')
-    lines.extend(' ' + c for c in textwrap.wrap(b64, 74))
-    lines.append('END:VCARD')
-    folded = []
-    for l in lines:
-        folded.extend(fold(l))
-    total = len(('\r\n'.join(folded) + '\r\n').encode('utf-8'))
-    return folded, total
-
-
-def fit_photo_for_qr(skeleton, path=PHOTO, size=QR_PHOTO_SIZE, budget=QR_PHOTO_BUDGET):
-    """Produces the QR thumbnail.
-
-    If a hand-made JPEG exists at PHOTO_OVERRIDE it is embedded byte for byte,
-    so you can tune it in whatever editor you like; this only checks that it
-    actually fits and reports the headroom. Otherwise the photo is resized from
-    the master and its JPEG quality binary-searched for the best-looking version
-    that stays under `budget`.
-    """
-    if os.path.exists(PHOTO_OVERRIDE):
-        jpeg = open(PHOTO_OVERRIDE, 'rb').read()
-        with Image.open(io.BytesIO(jpeg)) as probe:
-            dims = probe.size
-        folded, total = assemble_with_photo(skeleton, jpeg)
-        if total > budget:
-            # Base64 inflates by 4/3 and folding adds ~3 bytes per 74 chars, so
-            # spell out the actual ceiling rather than leaving it to be guessed.
-            allowance = (budget - (total - len(base64.b64encode(jpeg)) -
-                                   3 * ((len(base64.b64encode(jpeg)) + 73) // 74)))
-            raise SystemExit(
-                f'{PHOTO_OVERRIDE} is {len(jpeg)} bytes at {dims[0]}x{dims[1]}, which makes a '
-                f'{total}-byte vCard -- {total - budget} over the {budget}-byte budget.\n'
-                f'The JPEG itself must be at most ~{allowance * 3 // 4} bytes. '
-                f'Re-export smaller, or raise QR_PHOTO_BUDGET (and check the version table '
-                f'in the README first).')
-        print(f'QR photo: {PHOTO_OVERRIDE} used as-is -- {dims[0]}x{dims[1]}, {len(jpeg)} bytes '
-              f'jpeg, {total} bytes total ({budget - total} bytes under budget)')
-        return folded
-
-    src = Image.open(path).convert('RGB').resize((size, size), Image.LANCZOS)
-
-    def assemble(quality):
-        buf = io.BytesIO()
-        src.save(buf, 'JPEG', quality=quality, optimize=True)
-        jpeg = buf.getvalue()
-        folded, total = assemble_with_photo(skeleton, jpeg)
-        return folded, jpeg, total
-
-    lo, hi, best = 5, 95, None
-    while lo <= hi:
-        mid = (lo + hi) // 2
-        folded, jpeg, total = assemble(mid)
-        if total <= budget:
-            best = (folded, jpeg, mid, total)
-            lo = mid + 1
-        else:
-            hi = mid - 1
-    if best is None:
-        raise SystemExit(f'no JPEG quality at {size}x{size}px fits the {budget}-byte budget; '
-                          f'shrink QR_PHOTO_SIZE')
-    folded, jpeg, quality, total = best
-    print(f'QR photo: {size}x{size}px @ quality {quality} -> {len(jpeg)} bytes jpeg, '
-          f'{total} bytes total ({budget - total} under budget, EC level {QR_PHOTO_ECL})')
-    return folded
 
 
 def patch_index_html(min_lines, card_url):
@@ -214,15 +134,13 @@ lines.extend(' ' + c for c in textwrap.wrap(photo, 74))
 lines.append('END:VCARD')
 write('drew-sparks.vcf', lines)
 
-# --- Minified card: fields kept short, plus a heavily compressed photo sized
-#     to fit a QR code. This is what the Contact QR encodes, so it has to work
-#     with zero network -- that is the entire reason it exists. ---
-min_skeleton = [
+# --- Minified card: text only, kept small so the QR stays easy to scan. This
+#     is what the Contact QR encodes. ---
+min_lines = [
     'BEGIN:VCARD', 'VERSION:3.0',
     'N:' + C['n'], 'FN:' + C['fn'], 'ORG:DriverLanding', 'TITLE:' + C['title'],
     'TEL;TYPE=CELL:' + C['tel_e164'], 'EMAIL:' + C['email'],
-    'URL:' + C['card'],
+    'URL:' + C['card'], 'END:VCARD',
 ]
-min_lines = fit_photo_for_qr(min_skeleton)
 write('drew-sparks.min.vcf', min_lines)
 patch_index_html(min_lines, C['card'])

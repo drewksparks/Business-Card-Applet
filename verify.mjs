@@ -55,13 +55,14 @@ const isJpeg = (buf) => buf[0] === 0xff && buf[1] === 0xd8;
 const fullPhoto = photoOf(full);
 check('full vCard photo unfolds to a valid JPEG', isJpeg(fullPhoto), `${fullPhoto.length} bytes`);
 
-/* The QR-embedded photo is the whole reason the min vCard exists: it is what
-   makes the Contact QR work with zero network. If this photo were ever
-   missing or corrupt, the QR would still encode fine -- only a phone actually
-   scanning it would ever notice, at a conference, with no way to fall back. */
+/* The min vCard must stay text-only. An embedded photo was tried and reverted:
+   it pushed the QR from 57 to 149 modules and measurably hurt real-world
+   scanning. Guarding it here because the regression is invisible from a
+   desk -- the code still encodes and still decodes on a clean render; it only
+   bites when someone is actually pointing a phone at it. */
 const minPhoto = photoOf(onDisk);
-check('QR-embedded photo is present', minPhoto.length > 0, `${minPhoto.length} bytes`);
-check('QR-embedded photo unfolds to a valid JPEG', isJpeg(minPhoto), `${minPhoto.length} bytes`);
+check('min vCard carries no photo (keeps the QR scannable)', minPhoto.length === 0,
+      minPhoto.length ? `${minPhoto.length} bytes found` : '');
 
 /* EC levels are read out of index.html rather than hardcoded here, so this
    check tracks whatever renderQR() actually requests instead of silently
@@ -75,14 +76,12 @@ const u = g.QR.encode(CARD_URL, urlEcl);
 const v = g.QR.encode(inlined, vcardEcl);
 check('link QR encodes', true, `v${u.version}, ${u.size} modules, EC ${urlEcl}`);
 check('contact QR encodes', true, `v${v.version}, ${v.size} modules, EC ${vcardEcl}`);
-/* Scanning needs roughly 2.3 captured camera pixels per module, measured by
-   simulating a camera against the real encoder. 157 modules (version 35) wants
-   ~360px of camera resolution -- still easy for any modern phone, and the
-   point past which the photo stops looking meaningfully better anyway. The
-   photo is fit to a byte budget in build-vcf.py to sit under this; the check
-   is here to catch a future budget or field change creeping the code denser
-   than was actually tested, not to police the current number. */
-check('contact QR stays under 157 modules', v.size <= 157, `${v.size} modules`);
+/* 149 modules was tested on a real phone and was hard to scan; 57 is what the
+   text-only card produces and what worked. 73 leaves room for a couple of
+   extra contact fields without getting near the density that caused trouble.
+   Simulation said 149 was fine, so this ceiling is set from the real-world
+   result instead. */
+check('contact QR stays under 73 modules', v.size <= 73, `${v.size} modules`);
 
 /* Every asset the service worker precaches has to exist, or install() rejects
    and the card silently loses offline support. Read the ASSETS array only —
@@ -131,6 +130,11 @@ check(`all ${icons.length} declared icons exist`, missingIcons.length === 0, mis
 const badge = html.match(/badge:\s*'([^']+)'/)?.[1] ?? '';
 check('notification badge uses the monochrome art',
       /monochrome|badge/.test(badge) && fs.existsSync(badge), badge);
+
+/* Send Contact is how a photo reaches someone offline now that the QR carries
+   none, so the file it shares has to exist and be the full card. */
+check('send-contact shares the full vCard', /fetch\('drew-sparks\.vcf'\)/.test(html));
+check('send-contact gates on canShare({files})', /canShare\(\{ files: \[/.test(html));
 
 /* The shortcut and notification both navigate here; a typo would send them to
    a 404 that only shows up on a phone, at a conference. */

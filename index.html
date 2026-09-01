@@ -497,6 +497,10 @@ body::before{
   width:34px;
   height:34px;
 }
+/* display:flex above beats the UA stylesheet's [hidden]{display:none}, so the
+   attribute silently does nothing without this -- which would have shipped a
+   Send Contact button to every browser that cannot actually share files. */
+.qr-side-bar button[hidden]{display:none}
 .qr-side-bar button svg{width:16px;height:16px}
 .qr-side-bar button:hover{color:var(--amber)}
 .qr-side-bar button[aria-selected="true"],
@@ -680,6 +684,9 @@ body::before{
   <symbol id="i-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
     <rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
   </symbol>
+  <symbol id="i-send" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21.5 2.5 11 13M21.5 2.5l-6.7 19-3.8-8.5L2.5 9.2z"/>
+  </symbol>
   <symbol id="i-bell" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
     <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"/>
   </symbol>
@@ -764,6 +771,9 @@ body::before{
             </button>
             <button id="copy-btn" title="Copy link" aria-label="Copy card link">
               <svg><use href="#i-copy"/></svg>
+            </button>
+            <button id="send-btn" title="Send contact" aria-label="Send the contact card to a nearby device" hidden>
+              <svg><use href="#i-send"/></svg>
             </button>
             <button id="pin-btn" title="Pin to notifications" aria-label="Pin the card to your notification shade">
               <svg><use href="#i-bell"/></svg>
@@ -882,31 +892,6 @@ body::before{
     'TEL;TYPE=CELL:+18652361194',
     'EMAIL:drew@driverlanding.com',
     'URL:' + CARD_URL,
-    'PHOTO;TYPE=JPEG;ENCODING=b:',
-    ' /9j/4AAQSkZJRgABAQAAAQABAAD/2wBDACYaHSEdGCYhHyErKCYtOV8+OTQ0OXVTWEVfinmRj4',
-    ' h5hYOYq9u6mKLPpIOFvv/Bz+Lp9fj1lLf////u/9vw9ez/2wBDASgrKzkyOXA+PnDsnYWd7Ozs',
-    ' 7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Oz/wAARCABgAG',
-    ' ADASIAAhEBAxEB/8QAGgAAAgMBAQAAAAAAAAAAAAAAAwUAAgQBBv/EADEQAAIBAwIEBQIEBwAA',
-    ' AAAAAAECAAMEERIhEzFBUQUiYXGRMoEUQlKxIzM0YnKh0f/EABgBAAMBAQAAAAAAAAAAAAAAAA',
-    ' ABAgME/8QAHREBAQEBAAIDAQAAAAAAAAAAAAECERIhAzFRQf/aAAwDAQACEQMRAD8AdySQN1c0',
-    ' 7WkalQ+w6kwAjutNSzsFUcyTFdz4yqkrbpq/ubYfEW3d5Vu3y5wo5KOQmePhNT3t3XO9YgenlE',
-    ' GybZd2Jh7e1qOwPJZtWwpAbgk9zIulzJPq0nKsw/1D0vELql9NZiOzbiba1rTA+kRfw0p1wzLq',
-    ' TPmXMc0Lk0tfGVchK6aSfzLuPiM+IuM5zM1KlSpj+EiqPQS8i7/BMiGqegnUqEnBgpakMv7RTV',
-    ' tOycFd1pozucKoyTPM3t013XLtso2Vewj29QXCcEsVXOWx19IGlZ29LdaYJ7tuZd3InxtJKVCr',
-    ' V/l02b1xtND2FWjRatUKjTvpG8dQdyoe2qKeqmT52q8QrZgaakcsTSTtF9mxW2U9s5z0hkuC76',
-    ' cffSRBS9Y7RRd7EmMLmq6voVct7Rfc6nBznl1GI4V+juh/T0v8B+0JA2tTiW1NsY2x8QsyppDU',
-    ' R5Se8CTgZPKZvCbw13q03O+Sy+3aXie+p0st5SqV6lPUFZWIwesPPNMdTEnqczRb31ajgata/p',
-    ' aVr4/7Cmv09nG3UiZbe/o1sAnQ3Zv+zXMuWfa2ekgXI7nPzL+QN3MlUBSCNswS6lYgrkN1zNJ7',
-    ' NW5KrUVjjB2gboJwiVxvOXdLT59I25eaVpqXNFT9TNkjsIEYWiGnbIrc8ZMLJJM6GbxCpw7RyO',
-    ' beUfeK/DqvCvqTdCdJ+80+L1MtTpDoNRi5TpYEdDmbYnpnq+0YaWIPQ4nJp8RpcK+qr0J1D7zN',
-    ' NEpNFC8rUNlbUv6W3Ezw9CiWIZhhf3is6DEV3uCAVCLpzz3zCI4J0PsZmDEEMIQstVd9j2kXPG',
-    ' mb1K6DB1PtJ4bpY1H6g6R6CZqy4B3PzAW9dre5LqMjGCO8mzsO0+kmWjfUKv5tB7NCXNXhWzuO',
-    ' g295ly94fYTXlTi3VR+mcD2EEo1MAOpxOTT4dS4t9SXoDqP2nV9RiY+OW+pFuFH0+VvbpEs9c6',
-    ' LURkcZVhgiIfwgoV3BbVpOFMIAaNuBhn3PaaZJzMYdlXKqupjpA6zuYJ6YdssScch2gFRVFXAz',
-    ' zleFhiTLmmOm0HWLOdGenmPeTzh97AlILEDoZepUYU+HqOknOJ1U0iCqHLH0jJWOvA7fSjXDD6',
-    ' vKvt1i2ytWu64QbKN2bsJ6ZEWmiogwqjAEKEqNops3YExIWJ3PMxtenFpUPpExO0IKhM5necJ2',
-    ' nFYFljAgnDIOU4YBxuUpjBMueYlGO4+Ig4TgE9pW0tKt3Uwgwv5mPITfZWf4g6qqnhAe2TG6It',
-    ' NQqKFUcgBAB2ttTtaQp0x7nqTDSSRG/9k=',
     'END:VCARD'
   ].join('\r\n') + '\r\n';
 
@@ -932,14 +917,13 @@ body::before{
   function renderQR() {
     var isUrl = mode === 'url';
     /* EC level per payload. The link is short enough that level Q costs
-       nothing — it lands on the same version M would. The vCard now carries a
-       photo (build-vcf.py fits it to a byte budget -- see that file), which
-       needs the extra capacity: level L, not M or Q, because this scans off a
-       lit phone screen at close range -- the easiest condition a reader ever
-       sees -- so the redundancy those levels spend is better spent as photo
-       bytes instead. */
+       nothing — it lands on the same version M would. The vCard stays at M and
+       stays text-only: an embedded photo was tried and pushed the code to 149
+       modules, which measurably hurt real-world scanning. Text-only at M is 57
+       modules, about 3.3 CSS pixels per module at the 200px this renders at.
+       For a photo offline, Send Contact shares the full .vcf instead. */
     frame.innerHTML = QR.toSVG(isUrl ? CARD_URL : VCARD, {
-      ecl: isUrl ? 'Q' : 'L',
+      ecl: isUrl ? 'Q' : 'M',
       quiet: 2,          /* #qrcode's white padding supplies the rest of the quiet zone */
       label: isUrl ? 'QR code linking to this card'
                    : 'QR code containing Drew Sparks contact details'
@@ -1139,6 +1123,48 @@ body::before{
     reduce.addEventListener ? reduce.addEventListener('change', onReduceChange)
                             : reduce.addListener(onReduceChange);
   })();
+
+  /* ---- Send the contact file to a nearby device ----
+     This is the answer to "a photo, offline" that embedding one in the QR was
+     not. Sharing the actual .vcf hands over the full card -- 300px photo,
+     LinkedIn, scheduling link, the lot -- straight to a nearby phone over
+     Quick Share or AirDrop, with no network on either side and no pressure on
+     the QR's density. The file is precached by the service worker, so this
+     works with no signal.
+
+     Hidden unless the browser will actually take files: canShare({files}) is
+     the only honest test, since navigator.share existing says nothing about
+     file support. */
+  var sendBtn = document.getElementById('send-btn');
+
+  if (sendBtn && navigator.canShare) {
+    /* Probe with a dummy file rather than fetching the real one on load --
+       the answer is the same and it costs nothing. */
+    try {
+      var probe = new File(['BEGIN:VCARD\r\nEND:VCARD\r\n'], 'probe.vcf', { type: 'text/vcard' });
+      if (navigator.canShare({ files: [probe] })) sendBtn.hidden = false;
+    } catch (err) { /* leave it hidden */ }
+  }
+
+  if (sendBtn) {
+    sendBtn.addEventListener('click', async function () {
+      try {
+        var res = await fetch('drew-sparks.vcf');
+        if (!res.ok) throw new Error('fetch failed');
+        var blob = await res.blob();
+        var file = new File([blob], 'drew-sparks.vcf', { type: 'text/vcard' });
+        if (!navigator.canShare || !navigator.canShare({ files: [file] })) {
+          showToast('Sharing files is not supported here');
+          return;
+        }
+        /* Files only, no url alongside: some targets silently drop the file
+           when both are present, which would send a link and no contact. */
+        await navigator.share({ files: [file], title: 'Drew Sparks — DriverLanding' });
+      } catch (err) {
+        if (err && err.name !== 'AbortError') showToast('Could not send contact');
+      }
+    });
+  }
 
   /* ---- Pin to the notification shade ----
      The closest a web app can get to keeping the card on the lock screen. A

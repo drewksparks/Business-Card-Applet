@@ -43,65 +43,46 @@ from the card they download. `build-vcf.py` also patches the `VCARD` array in
 now contains a base64 photo blob, and hand-copying that is exactly the kind of
 thing that silently drifts.
 
-## The Contact QR's photo
+## The Contact QR, and getting a photo offline
 
-The min vCard's photo isn't just compressed — it's fit to a byte budget so the
-finished QR stays a size a phone camera can actually read, with zero network
-involved. That budget *is* the image quality: there's no server to fall back
-to.
+**The Contact QR is text-only, deliberately.** A 96×96 embedded photo was tried
+and reverted: it pushed the code from 57 to 149 modules, and scanning it on a
+real phone in a real room got noticeably harder. A camera simulation had said
+the density was fine — it was wrong, and the phone was right. The picture
+wasn't worth the friction.
 
-Current output: **96×96 @ quality 21, a 1301-byte JPEG, 2041 bytes total**,
-encoding as a version-33 code (149 modules).
+Text-only holds the code at version 10 / 57 modules — about **3.3 CSS pixels
+per module** at the 200px it renders at. Chunky and forgiving.
 
-### Making your own thumbnail by hand
+`verify.mjs` enforces a 73-module ceiling so this can't creep back. The
+regression is invisible from a desk: the code still encodes, and still decodes
+from a clean render. It only bites when someone is pointing a phone at it.
 
-Drop a JPEG at **`assets/vcard-photo-qr.jpg`** and `build-vcf.py` embeds it
-byte for byte instead of generating one — tune it in whatever editor you like.
-Delete the file to go back to automatic fitting.
+### Send Contact — the actual answer for offline
 
-The constraint is bytes, not pixels. At the current 2050-byte budget the JPEG
-itself must be **≤ ~1360 bytes**. If it doesn't fit, the script refuses and
-prints the exact ceiling rather than silently producing an unscannable code.
+The QR was the wrong place to put a photo. **Send Contact** (the paper-plane in
+the QR sidebar) shares the real `drew-sparks.vcf` — 300px photo, LinkedIn,
+scheduling link, everything — straight to a nearby phone over Quick Share or
+AirDrop. No network on either side, and no pressure on the QR's density.
 
-Roughly 80% of the vCard is the photo: base64 inflates the JPEG by 4/3, line
-folding adds ~3 bytes per 74 characters, and the contact fields cost ~204
-bytes. So `jpeg_bytes ≈ (budget − 240) × 0.75`.
+The file is precached by the service worker, so it works with no signal. The
+button only appears where `navigator.canShare({ files })` is true, since
+`navigator.share` existing says nothing about file support.
 
-### Wanting a bigger photo
+So there are three handoffs, each right for a different moment:
 
-The lever is `QR_PHOTO_SIZE` and `QR_PHOTO_BUDGET` at the top of
-`build-vcf.py`. Raise both together and re-run. Capacities at EC level L:
+| | Needs network | Carries photo | Good for |
+|---|---|---|---|
+| Contact QR | no | no | anyone, instantly, no setup |
+| Send Contact | no | **yes** | in person, phone to phone |
+| Share (link) | recipient only | yes, once loaded | texting someone later |
 
-| Version | Modules | Max bytes | Photo this affords | Camera px needed |
-|---|---|---|---|---|
-| 27 | 125 | 1465 | ~56px | ~289 |
-| 31 | 141 | 1840 | ~80px | ~325 |
-| **33** | **149** | **2068** | **~96px (current)** | **~342** |
-| 35 | 157 | 2303 | ~112px | ~360 |
-| 37 | 165 | 2563 | ~120px | ~378 |
-| 40 | 177 | 2953 | ~136px | ~407 |
+### If you want more in the QR later
 
-"Camera px needed" is measured, not guessed: simulating a camera against the
-real encoder shows decoding needs roughly **2.3 captured pixels per module**.
-Any modern phone clears 400px at normal scanning distance, so the whole table
-is viable — but denser codes are less forgiving of motion, angle and bad light,
-which is exactly what a conference hall has. 96px was chosen because 112px and
-above look barely different while costing real margin.
-
-`verify.mjs` enforces a 157-module ceiling, so pushing past version 35 means
-raising that too — deliberately, not by accident.
-
-### What doesn't help
-
-- **Encoder tricks.** Progressive JPEG is ~17% *larger* at these sizes, and
-  4:2:0 chroma subsampling is already the default. The current settings are
-  already optimal.
-- **Dropping the fold.** Unfolded lines would save ~48 bytes (3%) but violate
-  the 75-octet limit parsers rely on.
-- **Trimming fields.** Removing the `URL:` line saves 41 bytes — under 3% more
-  photo, in exchange for the scanned contact no longer linking back here.
-
-Base64's 33% inflation is inherent to vCard and can't be avoided.
+There's headroom before density becomes a problem again — roughly 100 more
+bytes keeps it under 73 modules. A one-line `NOTE:` saying what DriverLanding
+does, or `ADR` with Knoxville/TN, would help someone remember the conversation
+when they find your card weeks later. Both are cheap; a photo is not.
 
 ## Icons
 
