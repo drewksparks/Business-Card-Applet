@@ -41,6 +41,8 @@
   --text:#1b2233;
   --muted:#8a91a0;
   --bg-gray:#EAEAEA;
+  /* How far the portrait rises above the card. Layout has to budget for it. */
+  --overhang:88px;
   --font:'Montserrat',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
 }
 
@@ -59,7 +61,7 @@ body{
   height:100vh;
   height:100dvh;
   overflow:hidden;          /* no pull-to-refresh, no page bounce */
-  padding:0 20px;
+  padding:calc(8px + env(safe-area-inset-top)) 20px calc(8px + env(safe-area-inset-bottom));
   position:relative;
   touch-action:none;
 }
@@ -93,9 +95,12 @@ body::before{
   display:flex;
   flex-direction:column;
   overflow:visible;         /* the avatar overhangs the card */
-  margin-top:20px;
+  /* Reserved space for the portrait. It is absolutely positioned, so without
+     this the flex centring below has no idea it exists and happily pushes it
+     off the top of the viewport — which is exactly what happened in standalone,
+     where the taller card left no slack to absorb it. */
+  padding-top:var(--overhang);
   animation:fadeInUp .8s cubic-bezier(.2,.8,.2,1);
-  transition:margin-top .3s ease;
 }
 
 /* Overhanging portrait — this is what makes the sheet read as a card.
@@ -107,7 +112,7 @@ body::before{
   width:168px;
   height:168px;
   position:absolute;
-  top:-88px;
+  top:0;                    /* the container's padding-top is the overhang */
   left:50%;
   transform:translateX(-50%);
   z-index:20;
@@ -128,7 +133,10 @@ body::before{
   flex-direction:column;
   position:relative;
   height:650px;
-  max-height:75vh;
+  /* Derived, not guessed. A vh fraction has to be tuned per display mode and
+     still breaks whenever the chrome differs; subtracting the overhang and the
+     page padding is correct everywhere by construction. */
+  max-height:calc(100dvh - var(--overhang) - 40px);
   transition:all .3s cubic-bezier(.4,0,.2,1);
 }
 
@@ -137,11 +145,10 @@ body::before{
      native sheet. */
   .inner-card{
     height:680px;
-    max-height:85vh;
+    max-height:calc(100dvh - var(--overhang) - 28px);
     border-radius:24px;
     box-shadow:0 25px 50px -12px rgba(0,0,0,.25);
   }
-  .container{margin-top:-10px}
   .header{background-color:var(--navy-deep)}
   #pin-btn{display:flex}
 }
@@ -611,14 +618,15 @@ body::before{
      contact rows and the footer cannot all fit, and the list starts scrolling.
      A taller cap plus a smaller code keeps everything visible at once. */
   .inner-card{max-height:88vh}
-  .profile-avatar{width:124px;height:124px;top:-64px}
+  :root{--overhang:64px}
+  .profile-avatar{width:124px;height:124px}
   .header{padding:64px 20px 26px}
   .header-arc{height:42px}
   .name{font-size:27px}
-  .contact-item{padding:9px 25px}
+  .contact-item{padding:7px 25px}
   .btn-primary{padding:15px}
   .footer-logo{font-size:18px;padding-top:10px}
-  .black-box-container{padding:14px 0}
+  .black-box-container{padding:10px 0}
   #qrcode svg{width:150px}
 }
 

@@ -2,7 +2,7 @@
    The whole point of this thing is that it works when you are standing in a
    convention hall on 1 bar of signal, so every asset is precached on install
    and served cache-first. Bump CACHE when any of them changes. */
-const CACHE = 'dl-card-v2';
+const CACHE = 'dl-card-v3';
 
 const ASSETS = [
   './',
