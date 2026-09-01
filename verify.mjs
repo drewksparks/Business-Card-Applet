@@ -34,23 +34,54 @@ const longLines = full.split('\r\n').filter((l) => Buffer.byteLength(l, 'utf8') 
 check('all vCard lines fold to <= 75 octets', longLines.length === 0,
       longLines.length ? `${longLines.length} long line(s)` : '');
 
-/* The photo must survive unfolding. */
-const unfolded = [];
-for (const line of full.split('\r\n')) {
-  if (line.startsWith(' ') && unfolded.length) unfolded[unfolded.length - 1] += line.slice(1);
-  else unfolded.push(line);
-}
-const photo = unfolded.find((l) => l.startsWith('PHOTO'));
-const jpeg = photo ? Buffer.from(photo.split(':')[1], 'base64') : Buffer.alloc(0);
-check('embedded photo unfolds to a valid JPEG', jpeg[0] === 0xff && jpeg[1] === 0xd8,
-      `${jpeg.length} bytes`);
+/* Unfolds a vCard's physical lines back to logical properties, per RFC 2425:
+   a line starting with a single space is a continuation of the previous one. */
+const unfold = (text) => {
+  const out = [];
+  for (const line of text.split('\r\n')) {
+    if (line.startsWith(' ') && out.length) out[out.length - 1] += line.slice(1);
+    else out.push(line);
+  }
+  return out;
+};
+
+const photoOf = (text) => {
+  const line = unfold(text).find((l) => l.startsWith('PHOTO'));
+  return line ? Buffer.from(line.split(':')[1], 'base64') : Buffer.alloc(0);
+};
+
+const isJpeg = (buf) => buf[0] === 0xff && buf[1] === 0xd8;
+
+const fullPhoto = photoOf(full);
+check('full vCard photo unfolds to a valid JPEG', isJpeg(fullPhoto), `${fullPhoto.length} bytes`);
+
+/* The QR-embedded photo is the whole reason the min vCard exists: it is what
+   makes the Contact QR work with zero network. If this photo were ever
+   missing or corrupt, the QR would still encode fine -- only a phone actually
+   scanning it would ever notice, at a conference, with no way to fall back. */
+const minPhoto = photoOf(onDisk);
+check('QR-embedded photo is present', minPhoto.length > 0, `${minPhoto.length} bytes`);
+check('QR-embedded photo unfolds to a valid JPEG', isJpeg(minPhoto), `${minPhoto.length} bytes`);
+
+/* EC levels are read out of index.html rather than hardcoded here, so this
+   check tracks whatever renderQR() actually requests instead of silently
+   testing a level the page no longer uses. */
+const eclMatch = html.match(/ecl:\s*isUrl\s*\?\s*'([A-Z])'\s*:\s*'([A-Z])'/);
+check('renderQR EC levels are readable from index.html', !!eclMatch);
+const [, urlEcl, vcardEcl] = eclMatch ?? [, 'Q', 'L'];
 
 /* Both codes must encode, and stay a sane size to scan off a phone screen. */
-const u = g.QR.encode(CARD_URL, 'Q');
-const v = g.QR.encode(inlined, 'M');
-check('link QR encodes', true, `v${u.version}, ${u.size} modules`);
-check('contact QR encodes', true, `v${v.version}, ${v.size} modules`);
-check('contact QR stays under 65 modules', v.size <= 65, `${v.size} modules`);
+const u = g.QR.encode(CARD_URL, urlEcl);
+const v = g.QR.encode(inlined, vcardEcl);
+check('link QR encodes', true, `v${u.version}, ${u.size} modules, EC ${urlEcl}`);
+check('contact QR encodes', true, `v${v.version}, ${v.size} modules, EC ${vcardEcl}`);
+/* 145 modules is roughly version 32 -- comfortably inside what qr.js's own
+   validation proved reliable (284/284 payloads through zxing-cpp up to
+   version 40). The photo is fit to a byte budget in build-vcf.py specifically
+   to stay well under this; this check exists to catch a future edit to that
+   budget (or to the contact fields) creeping the code past a size that is
+   still easy to scan off a phone screen, not to police the current number. */
+check('contact QR stays under 145 modules', v.size <= 145, `${v.size} modules`);
 
 /* Every asset the service worker precaches has to exist, or install() rejects
    and the card silently loses offline support. Read the ASSETS array only —

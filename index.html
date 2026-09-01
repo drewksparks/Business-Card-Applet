@@ -882,6 +882,23 @@ body::before{
     'TEL;TYPE=CELL:+18652361194',
     'EMAIL:drew@driverlanding.com',
     'URL:' + CARD_URL,
+    'PHOTO;TYPE=JPEG;ENCODING=b:',
+    ' /9j/4AAQSkZJRgABAQAAAQABAAD/2wBDABwTFRgVERwYFhgfHRwhKUUtKSYmKVQ8QDJFZFhpZ2',
+    ' JYYF9ufJ6GbnWWd19giruLlqOpsbOxa4TC0MGszp6usar/2wBDAR0fHykkKVEtLVGqcmByqqqq',
+    ' qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqr/wAARCAA4AD',
+    ' gDASIAAhEBAxEB/8QAGgAAAgMBAQAAAAAAAAAAAAAAAAUCAwQBBv/EAC0QAAIBAgUDAwMEAwAA',
+    ' AAAAAAECAwARBAUSITETQVEiMnFCYYEGYpGhscHh/8QAGAEBAQEBAQAAAAAAAAAAAAAAAQIAAw',
+    ' T/xAAeEQACAgICAwAAAAAAAAAAAAAAAQIRITEDQRITUf/aAAwDAQACEQMRAD8A9JSnM87iwjGK',
+    ' ACWYc7+lfmpZ3jZYIhh8KGaeUfSLlR5pHDk2Ll3cLEP3G5/gVrS2am9EWx2NxslnnkseFTYf1Q',
+    ' +X4kDUIyv3Lb0xy2FcNNNAbM0be61rgit87DQeKhyfR0UVWRHl02Z9cxQTG6blZGutvz/qvSxz',
+    ' y9JeqE6nfTe1IMESM6QKdirXt8U8qJTZlFFqSOXAJveiowFetpJGq1wKKvjusky2Zo8XDiZHEc',
+    ' gLAkFe+1W140llkJuQwPI80xwuczxWWYdZfJ2b+amXE9oVP6NngBxUjkkawN/iqp0jTCMvUuL3',
+    ' uT2qQx0GKjHSJLX9pG481CZQ2HsAXHbfihX2dFTKIMOozGBoSW5YnwLU4pdlUfpaUnj0D7+TW9',
+    ' 3EaM7cKCTUSeTCibGmP9QREH0RkRn88/5/qilDO0kxkPuZr/m9FelRpUcG7ZozWA4bMZo7WBbU',
+    ' vwd6ohheZrKNu5PAr0uf4FMRHHNq0up0/I8UtVVjXSosBVAEC9BFCcje/mpTurKSLq3cA81y9U',
+    ' SRln1M7X7W4FDjYxlRHB42bBM9lDxs26k8H7Vrx2ZRzZe6oGV3spU+O9YJg0raeFHNu5qib3Bf',
+    ' FR603Y+T0X5VAcTmMMdrjVqb4G9FP8hy44SAzTLaaQcH6R4oq2B3O3t0V+TSdm3oopRJ1DdQa4',
+    ' x2NFFYxAKXk0IpYngAU7y7Jo8NJ15yJJuQOy/9oooYoa0UUUCf/9k=',
     'END:VCARD'
   ].join('\r\n') + '\r\n';
 
@@ -907,11 +924,14 @@ body::before{
   function renderQR() {
     var isUrl = mode === 'url';
     /* EC level per payload. The link is short enough that level Q costs
-       nothing — it lands on the same version M would. The vCard is ~200 bytes,
-       where Q would push it to 65 modules against 57 at M; on a backlit screen
-       the larger modules scan faster than the redundancy would ever save. */
+       nothing — it lands on the same version M would. The vCard now carries a
+       photo (build-vcf.py fits it to a byte budget -- see that file), which
+       needs the extra capacity: level L, not M or Q, because this scans off a
+       lit phone screen at close range -- the easiest condition a reader ever
+       sees -- so the redundancy those levels spend is better spent as photo
+       bytes instead. */
     frame.innerHTML = QR.toSVG(isUrl ? CARD_URL : VCARD, {
-      ecl: isUrl ? 'Q' : 'M',
+      ecl: isUrl ? 'Q' : 'L',
       quiet: 2,          /* #qrcode's white padding supplies the rest of the quiet zone */
       label: isUrl ? 'QR code linking to this card'
                    : 'QR code containing Drew Sparks contact details'

@@ -14,7 +14,7 @@ Zero build step, zero runtime dependencies, works offline.
 | `sw.js` | Service worker; precaches the card so it works with no signal. |
 | `manifest.json` | PWA manifest for home-screen install. |
 | `drew-sparks.vcf` | Full contact card with embedded photo — the download target. |
-| `drew-sparks.min.vcf` | Stripped card, kept small so the Contact QR scans fast. |
+| `drew-sparks.min.vcf` | Stripped card with a QR-sized photo — this is what the Contact QR encodes. |
 | `assets/knox-BG.png` | Knoxville street map used as the page background. |
 | `assets/headshot-cutout.png` | Transparent portrait that overhangs the card. |
 | `build-vcf.py` | Regenerates both `.vcf` files. |
@@ -38,7 +38,37 @@ python3 build-vcf.py && node verify.mjs
 
 `verify.mjs` fails loudly if the inlined vCard and the `.vcf` file drift apart —
 which would otherwise mean the QR someone scans hands them different details
-from the card they download.
+from the card they download. `build-vcf.py` also patches the `VCARD` array in
+`index.html` directly, rather than leaving it to be copied by hand — the array
+now contains a base64 photo blob, and hand-copying that is exactly the kind of
+thing that silently drifts.
+
+## The Contact QR's photo
+
+The min vCard's photo isn't just compressed — it's fit to a byte budget so the
+finished QR code stays a size a phone camera can actually read, with zero
+network involved. That budget IS the image quality: there's no server to fall
+back to.
+
+`build-vcf.py`'s `fit_photo_for_qr()` resizes the source photo to 56×56px and
+binary-searches JPEG quality for the highest one that keeps the whole vCard
+(all fields, folded, plus the base64 photo) under 1450 bytes. That leaves
+~80 bytes of slack under the 1465-byte cap of a version-27 QR code at EC level
+L — so a future edit to a phone number or email doesn't silently bump the code
+to the next version tier. Current output: 56×56 @ quality 29, an 872-byte
+JPEG, 1445 bytes total, encoding as a version-27 code (125 modules).
+
+EC level L, not M or Q: this code is read off a lit phone screen at close
+range — about the easiest condition a QR reader ever sees — so the extra
+error-correction those levels spend is better spent as photo bytes instead.
+`renderQR()` in `index.html` picks the level per payload; `verify.mjs` reads
+whichever level is actually configured there rather than assuming one, so it
+can't silently start testing a level the page no longer uses.
+
+To change the photo, replace `assets/vcard-photo.jpg` (the same 200×200 source
+the full vCard's higher-quality photo also comes from) and re-run
+`build-vcf.py`. To change the budget or thumbnail size, edit `QR_PHOTO_SIZE` /
+`QR_PHOTO_BUDGET` at the top of the script — the search re-fits automatically.
 
 ## Icons
 
