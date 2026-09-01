@@ -46,29 +46,62 @@ thing that silently drifts.
 ## The Contact QR's photo
 
 The min vCard's photo isn't just compressed — it's fit to a byte budget so the
-finished QR code stays a size a phone camera can actually read, with zero
-network involved. That budget IS the image quality: there's no server to fall
-back to.
+finished QR stays a size a phone camera can actually read, with zero network
+involved. That budget *is* the image quality: there's no server to fall back
+to.
 
-`build-vcf.py`'s `fit_photo_for_qr()` resizes the source photo to 56×56px and
-binary-searches JPEG quality for the highest one that keeps the whole vCard
-(all fields, folded, plus the base64 photo) under 1450 bytes. That leaves
-~80 bytes of slack under the 1465-byte cap of a version-27 QR code at EC level
-L — so a future edit to a phone number or email doesn't silently bump the code
-to the next version tier. Current output: 56×56 @ quality 29, an 872-byte
-JPEG, 1445 bytes total, encoding as a version-27 code (125 modules).
+Current output: **96×96 @ quality 21, a 1301-byte JPEG, 2041 bytes total**,
+encoding as a version-33 code (149 modules).
 
-EC level L, not M or Q: this code is read off a lit phone screen at close
-range — about the easiest condition a QR reader ever sees — so the extra
-error-correction those levels spend is better spent as photo bytes instead.
-`renderQR()` in `index.html` picks the level per payload; `verify.mjs` reads
-whichever level is actually configured there rather than assuming one, so it
-can't silently start testing a level the page no longer uses.
+### Making your own thumbnail by hand
 
-To change the photo, replace `assets/vcard-photo.jpg` (the same 200×200 source
-the full vCard's higher-quality photo also comes from) and re-run
-`build-vcf.py`. To change the budget or thumbnail size, edit `QR_PHOTO_SIZE` /
-`QR_PHOTO_BUDGET` at the top of the script — the search re-fits automatically.
+Drop a JPEG at **`assets/vcard-photo-qr.jpg`** and `build-vcf.py` embeds it
+byte for byte instead of generating one — tune it in whatever editor you like.
+Delete the file to go back to automatic fitting.
+
+The constraint is bytes, not pixels. At the current 2050-byte budget the JPEG
+itself must be **≤ ~1360 bytes**. If it doesn't fit, the script refuses and
+prints the exact ceiling rather than silently producing an unscannable code.
+
+Roughly 80% of the vCard is the photo: base64 inflates the JPEG by 4/3, line
+folding adds ~3 bytes per 74 characters, and the contact fields cost ~204
+bytes. So `jpeg_bytes ≈ (budget − 240) × 0.75`.
+
+### Wanting a bigger photo
+
+The lever is `QR_PHOTO_SIZE` and `QR_PHOTO_BUDGET` at the top of
+`build-vcf.py`. Raise both together and re-run. Capacities at EC level L:
+
+| Version | Modules | Max bytes | Photo this affords | Camera px needed |
+|---|---|---|---|---|
+| 27 | 125 | 1465 | ~56px | ~289 |
+| 31 | 141 | 1840 | ~80px | ~325 |
+| **33** | **149** | **2068** | **~96px (current)** | **~342** |
+| 35 | 157 | 2303 | ~112px | ~360 |
+| 37 | 165 | 2563 | ~120px | ~378 |
+| 40 | 177 | 2953 | ~136px | ~407 |
+
+"Camera px needed" is measured, not guessed: simulating a camera against the
+real encoder shows decoding needs roughly **2.3 captured pixels per module**.
+Any modern phone clears 400px at normal scanning distance, so the whole table
+is viable — but denser codes are less forgiving of motion, angle and bad light,
+which is exactly what a conference hall has. 96px was chosen because 112px and
+above look barely different while costing real margin.
+
+`verify.mjs` enforces a 157-module ceiling, so pushing past version 35 means
+raising that too — deliberately, not by accident.
+
+### What doesn't help
+
+- **Encoder tricks.** Progressive JPEG is ~17% *larger* at these sizes, and
+  4:2:0 chroma subsampling is already the default. The current settings are
+  already optimal.
+- **Dropping the fold.** Unfolded lines would save ~48 bytes (3%) but violate
+  the 75-octet limit parsers rely on.
+- **Trimming fields.** Removing the `URL:` line saves 41 bytes — under 3% more
+  photo, in exchange for the scanned contact no longer linking back here.
+
+Base64's 33% inflation is inherent to vCard and can't be avoided.
 
 ## Icons
 

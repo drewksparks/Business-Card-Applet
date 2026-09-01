@@ -18,19 +18,37 @@ import base64, io, os, re, textwrap
 
 from PIL import Image
 
-PHOTO = 'assets/vcard-photo.jpg'
+PHOTO = 'assets/vcard-photo.jpg'          # 400x400 master, source for both cards
+PHOTO_OVERRIDE = 'assets/vcard-photo-qr.jpg'   # optional hand-made QR thumbnail
 INDEX_HTML = 'index.html'
 
-# The minified card's photo is sized to fit inside a QR code someone scans off
-# a phone screen with no network -- there is no server round trip to fall back
-# to, so this budget IS the image quality. 1450 bytes leaves ~80 bytes of slack
-# under the 1465-byte cap of a version-27 code at EC level L (see qr.js), so a
-# future edit to a phone number or email does not silently jump the QR to the
-# next version tier. EC level L, not M or Q: this is scanned off a lit screen
-# at close range, the easiest condition a QR reader ever sees, so the extra
-# error-correction those levels spend is better spent as photo bytes instead.
-QR_PHOTO_SIZE = 56
-QR_PHOTO_BUDGET = 1450
+# The downloadable card is fetched over the network like any file, so its photo
+# is only limited by taste. 300px matches what the pre-DriverLanding card
+# shipped, at ~13KB.
+FULL_PHOTO_SIZE = 300
+FULL_PHOTO_QUALITY = 72
+
+# The minified card's photo has to fit inside a QR code someone scans off a
+# phone screen with no network -- there is no server round trip to fall back
+# to, so this budget IS the image quality.
+#
+# Sizing rule, measured rather than guessed: a QR needs roughly 2.3 captured
+# camera pixels per module to decode. At 96px/2050 bytes the code lands on
+# version 33 (149 modules), needing ~342px of camera resolution against ~289px
+# for the old 56px thumbnail -- about 18% more demanding, which any modern
+# phone clears by a wide margin at normal scanning distance. Going further hits
+# diminishing visual returns: 112px looks barely different but needs ~360px.
+#
+# 2050 leaves ~18 bytes under version 33's 2068-byte cap at EC level L, so a
+# short future edit to a field will not silently push the code a version
+# larger. Raise both together if you want a bigger photo -- see README for the
+# version/capacity table.
+#
+# EC level L, not M or Q: this is read off a lit screen at close range, the
+# easiest condition a reader ever sees, so the redundancy those levels spend is
+# better spent as photo bytes.
+QR_PHOTO_SIZE = 96
+QR_PHOTO_BUDGET = 2050
 QR_PHOTO_ECL = 'L'
 
 C = dict(
@@ -67,24 +85,56 @@ def write(path, lines):
     print(f'{path}: {os.path.getsize(path)} bytes, {len(lines)} lines')
 
 
+def assemble_with_photo(skeleton, jpeg):
+    """Folds a skeleton plus a base64 PHOTO into finished vCard lines."""
+    b64 = base64.b64encode(jpeg).decode()
+    lines = list(skeleton)
+    lines.append('PHOTO;TYPE=JPEG;ENCODING=b:')
+    lines.extend(' ' + c for c in textwrap.wrap(b64, 74))
+    lines.append('END:VCARD')
+    folded = []
+    for l in lines:
+        folded.extend(fold(l))
+    total = len(('\r\n'.join(folded) + '\r\n').encode('utf-8'))
+    return folded, total
+
+
 def fit_photo_for_qr(skeleton, path=PHOTO, size=QR_PHOTO_SIZE, budget=QR_PHOTO_BUDGET):
-    """Binary-searches JPEG quality for the largest, best-looking thumbnail that
-    still keeps the finished vCard under `budget` bytes once folded."""
+    """Produces the QR thumbnail.
+
+    If a hand-made JPEG exists at PHOTO_OVERRIDE it is embedded byte for byte,
+    so you can tune it in whatever editor you like; this only checks that it
+    actually fits and reports the headroom. Otherwise the photo is resized from
+    the master and its JPEG quality binary-searched for the best-looking version
+    that stays under `budget`.
+    """
+    if os.path.exists(PHOTO_OVERRIDE):
+        jpeg = open(PHOTO_OVERRIDE, 'rb').read()
+        with Image.open(io.BytesIO(jpeg)) as probe:
+            dims = probe.size
+        folded, total = assemble_with_photo(skeleton, jpeg)
+        if total > budget:
+            # Base64 inflates by 4/3 and folding adds ~3 bytes per 74 chars, so
+            # spell out the actual ceiling rather than leaving it to be guessed.
+            allowance = (budget - (total - len(base64.b64encode(jpeg)) -
+                                   3 * ((len(base64.b64encode(jpeg)) + 73) // 74)))
+            raise SystemExit(
+                f'{PHOTO_OVERRIDE} is {len(jpeg)} bytes at {dims[0]}x{dims[1]}, which makes a '
+                f'{total}-byte vCard -- {total - budget} over the {budget}-byte budget.\n'
+                f'The JPEG itself must be at most ~{allowance * 3 // 4} bytes. '
+                f'Re-export smaller, or raise QR_PHOTO_BUDGET (and check the version table '
+                f'in the README first).')
+        print(f'QR photo: {PHOTO_OVERRIDE} used as-is -- {dims[0]}x{dims[1]}, {len(jpeg)} bytes '
+              f'jpeg, {total} bytes total ({budget - total} bytes under budget)')
+        return folded
+
     src = Image.open(path).convert('RGB').resize((size, size), Image.LANCZOS)
 
     def assemble(quality):
         buf = io.BytesIO()
         src.save(buf, 'JPEG', quality=quality, optimize=True)
         jpeg = buf.getvalue()
-        b64 = base64.b64encode(jpeg).decode()
-        lines = list(skeleton)
-        lines.append('PHOTO;TYPE=JPEG;ENCODING=b:')
-        lines.extend(' ' + c for c in textwrap.wrap(b64, 74))
-        lines.append('END:VCARD')
-        folded = []
-        for l in lines:
-            folded.extend(fold(l))
-        total = len(('\r\n'.join(folded) + '\r\n').encode('utf-8'))
+        folded, total = assemble_with_photo(skeleton, jpeg)
         return folded, jpeg, total
 
     lo, hi, best = 5, 95, None
@@ -101,7 +151,7 @@ def fit_photo_for_qr(skeleton, path=PHOTO, size=QR_PHOTO_SIZE, budget=QR_PHOTO_B
                           f'shrink QR_PHOTO_SIZE')
     folded, jpeg, quality, total = best
     print(f'QR photo: {size}x{size}px @ quality {quality} -> {len(jpeg)} bytes jpeg, '
-          f'{total} bytes total (budget {budget}, EC level {QR_PHOTO_ECL})')
+          f'{total} bytes total ({budget - total} under budget, EC level {QR_PHOTO_ECL})')
     return folded
 
 
@@ -151,7 +201,12 @@ lines = []
 for p in props:
     lines.extend(fold(p))
 
-photo = base64.b64encode(open(PHOTO, 'rb').read()).decode()
+_full = Image.open(PHOTO).convert('RGB').resize((FULL_PHOTO_SIZE, FULL_PHOTO_SIZE), Image.LANCZOS)
+_buf = io.BytesIO()
+_full.save(_buf, 'JPEG', quality=FULL_PHOTO_QUALITY, optimize=True)
+print(f'full-card photo: {FULL_PHOTO_SIZE}x{FULL_PHOTO_SIZE} @ quality {FULL_PHOTO_QUALITY} -> '
+      f'{len(_buf.getvalue())} bytes jpeg')
+photo = base64.b64encode(_buf.getvalue()).decode()
 # vCard 3.0 base64: break immediately after the property colon, then one
 # leading space on every continuation line.
 lines.append('PHOTO;TYPE=JPEG;ENCODING=b:')

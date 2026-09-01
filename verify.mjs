@@ -75,13 +75,14 @@ const u = g.QR.encode(CARD_URL, urlEcl);
 const v = g.QR.encode(inlined, vcardEcl);
 check('link QR encodes', true, `v${u.version}, ${u.size} modules, EC ${urlEcl}`);
 check('contact QR encodes', true, `v${v.version}, ${v.size} modules, EC ${vcardEcl}`);
-/* 145 modules is roughly version 32 -- comfortably inside what qr.js's own
-   validation proved reliable (284/284 payloads through zxing-cpp up to
-   version 40). The photo is fit to a byte budget in build-vcf.py specifically
-   to stay well under this; this check exists to catch a future edit to that
-   budget (or to the contact fields) creeping the code past a size that is
-   still easy to scan off a phone screen, not to police the current number. */
-check('contact QR stays under 145 modules', v.size <= 145, `${v.size} modules`);
+/* Scanning needs roughly 2.3 captured camera pixels per module, measured by
+   simulating a camera against the real encoder. 157 modules (version 35) wants
+   ~360px of camera resolution -- still easy for any modern phone, and the
+   point past which the photo stops looking meaningfully better anyway. The
+   photo is fit to a byte budget in build-vcf.py to sit under this; the check
+   is here to catch a future budget or field change creeping the code denser
+   than was actually tested, not to police the current number. */
+check('contact QR stays under 157 modules', v.size <= 157, `${v.size} modules`);
 
 /* Every asset the service worker precaches has to exist, or install() rejects
    and the card silently loses offline support. Read the ASSETS array only —
