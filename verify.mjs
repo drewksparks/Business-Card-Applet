@@ -96,6 +96,18 @@ const assets = assetBlock
 const missing = assets.filter((a) => !fs.existsSync(a));
 check(`all ${assets.length} precache assets exist`, missing.length === 0, missing.join(', '));
 
+/* The host sends Cache-Control: max-age=7200 on everything (a Bluehost
+   default, not set by this project's .htaccess). A plain fetch() in the SW
+   would honor that and silently hand back the browser's own stale HTTP cache
+   instead of asking the server for anything -- discovered when a real deploy
+   took two reloads to show up. Both fetch paths must force past it, or a
+   future edit here could quietly reintroduce a redeploy delay of up to two
+   hours with no error anywhere to notice it by. */
+check('install-time precache bypasses the host\'s HTTP cache',
+      /new Request\(url, \{ cache: 'reload' \}\)/.test(sw));
+check('same-origin revalidation bypasses the host\'s HTTP cache',
+      /fetch\(req, \{ cache: 'reload' \}\)/.test(sw));
+
 /* Icons. These only misbehave on a real handset — a clipped maskable or a blob
    of a badge is invisible from here — so the declarations get checked instead. */
 const manifest = JSON.parse(fs.readFileSync('manifest.json', 'utf8'));

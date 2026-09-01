@@ -113,6 +113,17 @@ Drop this directory in at the web root as `card/`. Two things are not optional:
 Bump `CACHE` in `sw.js` whenever a precached asset changes, or returning
 visitors keep the old version.
 
+**The host sends `Cache-Control: max-age=7200` on everything** — a Bluehost
+default, not set by either `.htaccess` here. Discovered the hard way: right
+after a deploy, the Contact QR's new photo took two reloads to show up. A
+plain `fetch()` in the service worker's stale-while-revalidate logic honors
+that header, so it can silently hand back the browser's own 2-hour-old HTTP
+cache instead of ever asking the server for anything — defeating the whole
+point of revalidating on every visit. Both the install-time precache and the
+same-origin fetch handler in `sw.js` pass `{ cache: 'reload' }` to force past
+it; `verify.mjs` checks both are still there, since dropping either silently
+reintroduces a redeploy delay with nothing to notice it by.
+
 ## Design
 
 The layout is deliberately the original: the Knoxville street map behind a white

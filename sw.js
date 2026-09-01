@@ -2,7 +2,7 @@
    The whole point of this thing is that it works when you are standing in a
    convention hall on 1 bar of signal, so every asset is precached on install
    and served cache-first. Bump CACHE when any of them changes. */
-const CACHE = 'dl-card-v3';
+const CACHE = 'dl-card-v4';
 
 const ASSETS = [
   './',
@@ -24,7 +24,10 @@ const ASSETS = [
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE)
-      .then((c) => c.addAll(ASSETS))
+      // Same reasoning as the fetch handler's cache:'reload' below: without it,
+      // a browser that visited in the last two hours (the host's ambient
+      // Cache-Control) could precache bytes from before this very deploy.
+      .then((c) => c.addAll(ASSETS.map((url) => new Request(url, { cache: 'reload' }))))
       .then(() => self.skipWaiting())
   );
 });
@@ -80,10 +83,19 @@ self.addEventListener('fetch', (event) => {
   }
 
   /* Same-origin: cache first, and refresh the entry in the background so a
-     redeploy is picked up on the following visit. */
+     redeploy is picked up on the following visit.
+
+     cache: 'reload' matters here, not just style: the host sends
+     Cache-Control: max-age=7200 on everything (a Bluehost default, not set by
+     this project's .htaccess), and a plain fetch() honors that -- it would
+     hand back the browser's own 2-hour-old HTTP cache instead of asking the
+     server for anything, which silently defeats this entire revalidation and
+     can leave a redeploy invisible for up to two hours. 'reload' forces the
+     request past that cache while still letting the browser store the fresh
+     response for later. */
   event.respondWith(
     caches.match(req).then((hit) => {
-      const net = fetch(req)
+      const net = fetch(req, { cache: 'reload' })
         .then((res) => {
           if (res && res.ok) {
             const copy = res.clone();
